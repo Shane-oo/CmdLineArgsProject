@@ -1,0 +1,911 @@
+{
+	"folders": [
+		{
+			"name": "CmdLineArgsProject",
+			"path": "."
+		},
+		{
+			"name": "UE5",
+			"path": "/media/shane/WorkDocuments/repos/UnrealEngine"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off",
+		"npm.autoDetect": "off",
+		"terminal.integrated.env.linux": {
+			"PATH": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+			"DOTNET_ROOT": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+			"DOTNET_HOST_PATH": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+			"DOTNET_MULTILEVEL_LOOKUP": "0",
+			"DOTNET_ROLL_FORWARD": "LatestMajor"
+		}
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "CmdLineArgsProject Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject Linux Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject Linux Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject Linux Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"Linux",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject LinuxArm64 Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject LinuxArm64 DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject LinuxArm64 Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Test Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Test Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject LinuxArm64 Test Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Test Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Test",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Shipping Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Shipping Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProject LinuxArm64 Shipping Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProject LinuxArm64 Shipping Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProject",
+					"LinuxArm64",
+					"Shipping",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Debug Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Debug Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProjectEditor Linux Debug Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Debug Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Debug",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux DebugGame Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux DebugGame Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProjectEditor Linux DebugGame Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux DebugGame Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"DebugGame",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Development Build",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Development Rebuild",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex"
+				],
+				"problemMatcher": "$msCompile",
+				"dependsOn": [
+					"CmdLineArgsProjectEditor Linux Development Clean"
+				],
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"label": "CmdLineArgsProjectEditor Linux Development Clean",
+				"group": "build",
+				"command": "Engine/Build/BatchFiles/Linux/Build.sh",
+				"args": [
+					"CmdLineArgsProjectEditor",
+					"Linux",
+					"Development",
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-waitmutex",
+					"-clean"
+				],
+				"problemMatcher": "$msCompile",
+				"type": "shell",
+				"options": {
+					"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Launch CmdLineArgsProject (Debug)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/Binaries/Linux/CmdLineArgsProject-Linux-Debug",
+				"preLaunchTask": "CmdLineArgsProject Linux Debug Build",
+				"args": [
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProject (DebugGame)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/Binaries/Linux/CmdLineArgsProject-Linux-DebugGame",
+				"preLaunchTask": "CmdLineArgsProject Linux DebugGame Build",
+				"args": [
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProject (Development)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/Binaries/Linux/CmdLineArgsProject",
+				"preLaunchTask": "CmdLineArgsProject Linux Development Build",
+				"args": [
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProject (Test)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/Binaries/Linux/CmdLineArgsProject-Linux-Test",
+				"preLaunchTask": "CmdLineArgsProject Linux Test Build",
+				"args": [
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProject (Shipping)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/Binaries/Linux/CmdLineArgsProject-Linux-Shipping",
+				"preLaunchTask": "CmdLineArgsProject Linux Shipping Build",
+				"args": [
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProjectEditor (Debug)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/Linux/UnrealEditor-Linux-Debug",
+				"preLaunchTask": "CmdLineArgsProjectEditor Linux Debug Build",
+				"args": [
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject"
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProjectEditor (DebugGame)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/Linux/UnrealEditor-Linux-DebugGame",
+				"preLaunchTask": "CmdLineArgsProjectEditor Linux DebugGame Build",
+				"args": [
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject"
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Launch CmdLineArgsProjectEditor (Development)",
+				"request": "launch",
+				"program": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/Linux/UnrealEditor",
+				"preLaunchTask": "CmdLineArgsProjectEditor Linux Development Build",
+				"args": [
+					"/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject"
+				],
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine",
+				"type": "cppdbg",
+				"visualizerFile": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Extras/VisualStudioDebugging/Unreal.natvis",
+				"showDisplayString": true,
+				"sourceFileMap": {
+					"/UEVFS/CmdLineArgsProject": "/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject",
+					"/UEVFS/Root": "/media/shane/WorkDocuments/repos/UnrealEngine"
+				}
+			},
+			{
+				"name": "Generate Project Files",
+				"type": "coreclr",
+				"request": "launch",
+				"preLaunchTask": "UnrealBuildTool Linux Development Build",
+				"program": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Build/BatchFiles/RunUBT.bat",
+				"args": [
+					"-projectfiles",
+					"-vscode",
+					"-project=/media/shane/WorkDocuments/repos/prac/CmdLineArgsProject/CmdLineArgsProject.uproject",
+					"-game",
+					"-engine",
+					"-dotnet"
+				],
+				"env": {
+					"PATH": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64:${env:PATH}",
+					"DOTNET_ROOT": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64",
+					"DOTNET_HOST_PATH": "/media/shane/WorkDocuments/repos/UnrealEngine/Engine/Binaries/ThirdParty/DotNet/8.0.300/linux-x64/dotnet",
+					"DOTNET_MULTILEVEL_LOOKUP": "0",
+					"DOTNET_ROLL_FORWARD": "LatestMajor"
+				},
+				"console": "internalConsole",
+				"internalConsoleOptions": "openOnSessionStart",
+				"stopAtEntry": false,
+				"cwd": "/media/shane/WorkDocuments/repos/UnrealEngine"
+			}
+		]
+	}
+}
