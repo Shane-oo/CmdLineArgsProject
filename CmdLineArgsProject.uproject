@@ -10,7 +10,8 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"MovieRenderPipelineCore"
+				"MovieRenderPipelineCore",
+				"CoreUObject"
 			]
 		}
 	],

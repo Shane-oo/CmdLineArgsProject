@@ -89,7 +89,7 @@ void ACubeActor::Tick(float DeltaTime)
     if (PictureTaken && TimeElapsed >= 10.f)
     {
         // shutdown
-        FGenericPlatformMisc::RequestExit(false);
+        //FGenericPlatformMisc::RequestExit(false);
     }
 }
 

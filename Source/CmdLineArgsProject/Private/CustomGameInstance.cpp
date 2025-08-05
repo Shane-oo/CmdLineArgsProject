@@ -5,6 +5,7 @@
 
 #include "CubeActor.h"
 #include "Chaos/PBDRigidClusteringAlgo.h"
+#include "CmdLineArgsProject/GLTFImporter/GLTFImporterFunctionLibrary.h"
 
 // #region Protected Methods
 
@@ -32,6 +33,16 @@ void UCustomGameInstance::OnStart()
                                                        SpawnParameters);
 
         CubeActor->Init();
+    }
+
+
+    auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+        FString("/home/shane/Downloads/c5820f7eccca45a7a659356d42de3ab6.glb")
+    );
+
+    if (glTfAsset)
+    {
+        UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::glTF Imported"));
     }
 }
 
