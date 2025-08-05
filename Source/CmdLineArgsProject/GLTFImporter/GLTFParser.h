@@ -12,7 +12,7 @@
 class CMDLINEARGSPROJECT_API FGLTFParser : public FGCObject, public TSharedFromThis<FGLTFParser>
 {
 public:
-    FGLTFParser();
+    explicit FGLTFParser(const TSharedPtr<FJsonObject>& JsonObject);
 
     virtual ~FGLTFParser() override;
 
@@ -22,6 +22,25 @@ public:
 
     static TSharedPtr<FGLTFParser> CreateFromRawData(const uint8* DataPtr, int64 DataNum);
 
+    static TSharedPtr<FGLTFParser> CreateFromBinaryData(const uint8* DataPtr, int64 DataNum);
+
+    static TSharedPtr<FGLTFParser> CreateFromString(const FString& GlTFJsonData);
+
 protected:
+    TArray64<uint8> BinaryBuffer;
+
+    TSharedPtr<FJsonObject> Root;
+
     TMap<int32, TObjectPtr<UStaticMesh>> StaticMeshesCache;
+
+public:
+    virtual FString GetReferencerName() const override
+    {
+        return TEXT("FGLTFParser");
+    }
+
+    void SetBinaryBuffer(const TArray64<uint8>& BinaryBuffer)
+    {
+        this->BinaryBuffer = BinaryBuffer;
+    }
 };
