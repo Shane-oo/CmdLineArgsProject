@@ -4,20 +4,78 @@
 
 #include "GLTFParser.h"
 
+// #region Private Methods
+
+void FGLTFParser::CheckExtensionsRequired() const
+{
+    if (Root)
+    {
+        TArray<FString> ExtensionsRequired;
+        Root->TryGetStringArrayField(TEXT("extensionsRequired"), ExtensionsRequired);
+        if (ExtensionsRequired.Contains("KHR_draco_mesh_compression"))
+        {
+            UE_LOG(LogTemp, Error, TEXT("FGLTFParser::FGLTFParser::Error:: Draco Compression Not Supported"));
+        }
+    }
+}
+
+bool FGLTFParser::CheckJsonIndex(const TSharedPtr<FJsonObject>& JsonObject,
+                                 const FString& FieldName,
+                                 const int32 Index,
+                                 TArray<TSharedRef<FJsonValue>>& JsonItems)
+{
+    if (Index < 0)
+    {
+        return false;
+    }
+
+    const TArray<TSharedPtr<FJsonValue>>* JsonArray;
+    if (!JsonObject->TryGetArrayField(FieldName, JsonArray))
+    {
+        return false;
+    }
+
+    if (Index >= JsonArray->Num())
+    {
+        return false;
+    }
+
+    for (const TSharedPtr<FJsonValue>& JsonItem : *JsonArray)
+    {
+        JsonItems.Add(JsonItem.ToSharedRef());
+    }
+
+    return true;
+}
+
+TSharedPtr<FJsonObject> FGLTFParser::GetJsonObjectFromIndex(const TSharedPtr<FJsonObject>& JsonObject,
+                                                            const FString& FieldName,
+                                                            const int32 Index)
+{
+    TArray<TSharedRef<FJsonValue>> JsonArray;
+
+    if (!CheckJsonIndex(JsonObject, FieldName, Index, JsonArray))
+    {
+        return nullptr;
+    }
+
+    return JsonArray[Index]->AsObject();
+}
+
+TSharedPtr<FJsonObject> FGLTFParser::GetJsonObjectFromRootIndex(const FString& FieldName, const int32 Index) const
+{
+    return GetJsonObjectFromIndex(Root, FieldName, Index);
+}
+
+// #endregion
+
 // #region Constructors
 
 FGLTFParser::FGLTFParser(const TSharedPtr<FJsonObject>& JsonObject)
 {
     Root = JsonObject;
 
-    if (IsInGameThread())
-    {
-        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::FGLTFParser::Display:: In Game Thread load mats"));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::FGLTFParser::Display:: Not In Game Thread load mats when we are"));
-    }
+    CheckExtensionsRequired();
 }
 
 // #endregion
@@ -170,6 +228,45 @@ TSharedPtr<FGLTFParser> FGLTFParser::CreateFromString(const FString& GlTFJsonDat
     TSharedPtr<FGLTFParser> Parser = MakeShared<FGLTFParser>(JsonObject);
 
     return Parser;
+}
+
+bool FGLTFParser::LoadScene()
+{
+    // Load Materials...
+
+    // Load All scenes => Usually just 1 with an index of 0
+    const TArray<TSharedPtr<FJsonValue>>* JsonScenes;
+    if (!Root->TryGetArrayField(TEXT("scenes"), JsonScenes))
+    {
+        // No Scenes, empty gltf
+        return false;
+    }
+
+    for (int32 SceneIndex = 0; SceneIndex < JsonScenes->Num(); SceneIndex++)
+    {
+        TSharedPtr<FJsonObject> JsonSceneObject = GetJsonObjectFromRootIndex("scenes", SceneIndex);
+        if (!JsonSceneObject)
+        {
+            return false;
+        }
+
+        const TArray<TSharedPtr<FJsonValue>>* JsonSceneNodes;
+        if (JsonSceneObject->TryGetArrayField(TEXT("nodes"), JsonSceneNodes))
+        {
+            for (TSharedPtr JsonSceneNode : *JsonSceneNodes)
+            {
+                int64 NodeIndex;
+                if (!JsonSceneNode->TryGetNumber(NodeIndex))
+                {
+                    return false;
+                }
+
+                UE_LOG(LogTemp, Display, TEXT("FGLTFParser::LoadScene::Display:: Loading Node %d"), NodeIndex);
+            }
+        }
+    }
+
+    return false;
 }
 
 // #endregion

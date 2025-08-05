@@ -5,6 +5,7 @@
 
 #include "CubeActor.h"
 #include "Chaos/PBDRigidClusteringAlgo.h"
+#include "CmdLineArgsProject/GLTFImporter/GLTFAsset.h"
 #include "CmdLineArgsProject/GLTFImporter/GLTFImporterFunctionLibrary.h"
 
 // #region Protected Methods
@@ -43,6 +44,12 @@ void UCustomGameInstance::OnStart()
     if (glTfAsset)
     {
         UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::glTF Imported"));
+
+        auto bModelLoaded = glTfAsset->LoadModel();
+        if (!bModelLoaded)
+        {
+            UE_LOG(LogTemp, Error, TEXT("UCustomGameInstance::OnStart::Error:: Failed To Load Model"));
+        }
     }
     else
     {

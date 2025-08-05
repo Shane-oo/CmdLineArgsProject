@@ -20,4 +20,17 @@ bool UGLTFAsset::LoadFromFileName(const FString& FileName)
     return Parser != nullptr;
 }
 
+bool UGLTFAsset::LoadModel() const
+{
+    if (!Parser)
+    {
+        UE_LOG(LogTemp, Error,
+               TEXT("UGLTFAsset::LoadModel::Error:: No glTF File Loaded yet. Call LoadFromFileName()"));
+
+        return false;
+    }
+
+    return Parser->LoadScene();
+}
+
 // #endregion

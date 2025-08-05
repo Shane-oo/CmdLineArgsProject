@@ -26,6 +26,8 @@ public:
 
     static TSharedPtr<FGLTFParser> CreateFromString(const FString& GlTFJsonData);
 
+    bool LoadScene();
+
 protected:
     TArray64<uint8> BinaryBuffer;
 
@@ -43,4 +45,31 @@ public:
     {
         this->BinaryBuffer = BinaryBuffer;
     }
+
+    TArray<TObjectPtr<UStaticMesh>> GetStaticMeshes()
+    {
+        TArray<TObjectPtr<UStaticMesh>> Result;
+        Result.Reserve(StaticMeshesCache.Num());
+
+        for (const TPair<int32, TObjectPtr<UStaticMesh>>& Pair : StaticMeshesCache)
+        {
+            Result.Add(Pair.Value);
+        }
+
+        return Result;
+    }
+
+private:
+    void CheckExtensionsRequired() const;
+
+    static bool CheckJsonIndex(const TSharedPtr<FJsonObject>& JsonObject,
+                               const FString& FieldName,
+                               const int32 Index,
+                               TArray<TSharedRef<FJsonValue>>& JsonItems);
+
+    static TSharedPtr<FJsonObject> GetJsonObjectFromIndex(const TSharedPtr<FJsonObject>& JsonObject,
+                                                          const FString& FieldName,
+                                                          const int32 Index);
+
+    TSharedPtr<FJsonObject> GetJsonObjectFromRootIndex(const FString& FieldName, const int32 Index) const;
 };

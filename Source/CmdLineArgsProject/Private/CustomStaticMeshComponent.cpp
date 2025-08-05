@@ -27,7 +27,8 @@ void UCustomStaticMeshComponent::InitMesh(const bool UseRedMaterial)
         SetMaterial(0, Material);
     }
 
-    CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Low_Poly_Viking_Interiors/Models/Props/SM_Skull_Deer_01.SM_Skull_Deer_01"));
+    CubeMesh = LoadObject<UStaticMesh>(
+        nullptr, TEXT("/Game/Low_Poly_Viking_Interiors/Models/Props/SM_Skull_Deer_01.SM_Skull_Deer_01"));
     if (CubeMesh)
     {
         SetStaticMesh(CubeMesh);
