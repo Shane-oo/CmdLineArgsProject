@@ -1,4 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//
+// Created by Shane on 5/8/25.
+//
 
 #pragma once
 
@@ -14,5 +16,10 @@ public:
 
     virtual ~FGLTFParser() override;
 
-    void AddReferencedObjects(FReferenceCollector& Collector);
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
+    static TSharedPtr<FGLTFParser> Create(const FString& FileName);
+
+protected:
+    TMap<int32, TObjectPtr<UStaticMesh>> StaticMeshesCache;
 };

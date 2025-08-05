@@ -3,12 +3,21 @@
 //
 
 #include "GLTFAsset.h"
+#include "GLTFParser.h"
 
 // #region Public Methods
 
 bool UGLTFAsset::LoadFromFileName(const FString& FileName)
 {
-    return true;
+    if (Parser)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UGLTFAsset::LoadFromFileName::Error:: Parser Aleady Exists"));
+        return false;
+    }
+
+    Parser = FGLTFParser::Create(FileName);
+
+    return Parser != nullptr;
 }
 
 // #endregion

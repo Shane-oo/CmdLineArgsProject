@@ -44,6 +44,12 @@ void UCustomGameInstance::OnStart()
     {
         UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::glTF Imported"));
     }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("UCustomGameInstance::OnStart::Error:: Failed To Import GLTF"));
+        // shutdown
+        //FGenericPlatformMisc::RequestExit(false);
+    }
 }
 
 void UCustomGameInstance::LoadComplete(const float LoadTime, const FString& MapName)

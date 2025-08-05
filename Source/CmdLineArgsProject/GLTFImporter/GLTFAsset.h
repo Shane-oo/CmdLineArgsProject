@@ -4,9 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "GLTFAsset.generated.h"
 
+class FGLTFParser;
 /**
  * 
  */
@@ -19,5 +19,5 @@ public:
     bool LoadFromFileName(const FString& FileName);
 
 protected:
-    //TSharedPtr<FJsonObject> ;
+    TSharedPtr<FGLTFParser> Parser;
 };
