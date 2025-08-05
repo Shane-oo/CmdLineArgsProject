@@ -18,7 +18,9 @@ public:
 
     virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-    static TSharedPtr<FGLTFParser> Create(const FString& FileName);
+    static TSharedPtr<FGLTFParser> CreateFromFileName(const FString& FileName);
+
+    static TSharedPtr<FGLTFParser> CreateFromRawData(const uint8* DataPtr, int64 DataNum);
 
 protected:
     TMap<int32, TObjectPtr<UStaticMesh>> StaticMeshesCache;

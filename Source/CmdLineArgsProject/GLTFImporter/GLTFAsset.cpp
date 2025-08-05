@@ -15,7 +15,7 @@ bool UGLTFAsset::LoadFromFileName(const FString& FileName)
         return false;
     }
 
-    Parser = FGLTFParser::Create(FileName);
+    Parser = FGLTFParser::CreateFromFileName(FileName);
 
     return Parser != nullptr;
 }
