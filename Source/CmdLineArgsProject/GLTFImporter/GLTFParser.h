@@ -73,6 +73,8 @@ private:
 
     TSharedPtr<FJsonObject> GetJsonObjectFromRootIndex(const FString& FieldName, const int32 Index) const;
 
+    static int64 GetJsonObjectIndex(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName);
+
     static FString GetJsonObjectString(const TSharedPtr<FJsonObject>& JsonObject,
                                        const FString& FieldName,
                                        const FString& DefaultValue);

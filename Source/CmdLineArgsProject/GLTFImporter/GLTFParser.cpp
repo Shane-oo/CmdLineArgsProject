@@ -67,6 +67,16 @@ TSharedPtr<FJsonObject> FGLTFParser::GetJsonObjectFromRootIndex(const FString& F
     return GetJsonObjectFromIndex(Root, FieldName, Index);
 }
 
+int64 FGLTFParser::GetJsonObjectIndex(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
+{
+    if (int64 Index; JsonObject->TryGetNumberField(FieldName, Index))
+    {
+        return Index;
+    }
+
+    return -1;
+}
+
 FString FGLTFParser::GetJsonObjectString(const TSharedPtr<FJsonObject>& JsonObject,
                                          const FString& FieldName,
                                          const FString& DefaultValue)
@@ -183,7 +193,76 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
     }
 
 
-    UE_LOG(LogTemp, Log, TEXT("Node %d Transform:\n%s"), NodeIndex, *Transform.ToString());
+    //UE_LOG(LogTemp, Log, TEXT("Node %d Transform:\n%s"), NodeIndex, *Transform.ToString());
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonChildren;
+        JsonNode->TryGetArrayField(TEXT("children"), JsonChildren))
+    {
+        for (int i = 0; i < JsonChildren->Num(); i++)
+        {
+            int64 ChildIndex;
+            if (!(*JsonChildren)[i]->TryGetNumber(ChildIndex))
+            {
+                return false;
+            }
+
+            const TSharedPtr<FJsonObject> JsonNodeObject = GetJsonObjectFromRootIndex("nodes", ChildIndex);
+
+            if (!JsonNodeObject)
+            {
+                return false;
+            }
+
+            if (!LoadNode(JsonNodeObject, ChildIndex))
+            {
+                return false;
+            }
+        }
+    }
+
+
+    if (const auto MeshIndex = GetJsonObjectIndex(JsonNode, TEXT("mesh"));
+        MeshIndex != -1)
+    {
+        TSharedPtr<FJsonObject> JsonMeshObject = GetJsonObjectFromRootIndex("meshes", MeshIndex);
+        if (!JsonMeshObject)
+        {
+            return false;
+        }
+
+        // Load Primitives
+        int PrimitiveCount = 0;
+        const TArray<TSharedPtr<FJsonValue>>* JsonPrimitives;
+        if (!JsonMeshObject->TryGetArrayField(TEXT("primitives"), JsonPrimitives))
+        {
+            return false;
+        }
+
+        for (auto JsonPrimitive : *JsonPrimitives)
+        {
+            TSharedPtr<FJsonObject> JsonPrimitiveObject = JsonPrimitive->AsObject();
+            if (!JsonPrimitiveObject)
+            {
+                return false;
+            }
+            //NOTE: Assuming always Triangles!
+
+            const TSharedPtr<FJsonObject>* JsonAttributesObject;
+            if (!JsonPrimitiveObject->TryGetObjectField(TEXT("attributes"), JsonAttributesObject))
+            {
+                return false;
+            }
+
+            // Vertices
+            int64 PositionAccessorIndex;
+            if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("POSITION"), PositionAccessorIndex))
+            {
+                return false;
+            }
+
+            UE_LOG(LogTemp, Log, TEXT("POSITION accessor index: %d"), PositionAccessorIndex);
+        }
+    }
 
     return true;
 }
