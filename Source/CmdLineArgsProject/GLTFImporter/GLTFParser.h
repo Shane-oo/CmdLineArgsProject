@@ -60,6 +60,18 @@ public:
     }
 
 private:
+    struct FBuffer
+    {
+        uint8* Data;
+        int64 Num;
+
+        FBuffer()
+        {
+            Data = nullptr;
+            Num = 0;
+        }
+    };
+
     void CheckExtensionsRequired() const;
 
     static bool CheckJsonIndex(const TSharedPtr<FJsonObject>& JsonObject,
@@ -83,6 +95,10 @@ private:
     static bool GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value);
 
     static bool FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValues, FMatrix& Matrix);
+
+    bool GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer) const;
+
+    bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
     bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
 };

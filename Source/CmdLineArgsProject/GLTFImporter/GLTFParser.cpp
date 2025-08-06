@@ -132,6 +132,32 @@ bool FGLTFParser::FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValue
     return true;
 }
 
+bool FGLTFParser::GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer) const
+{
+    const TSharedPtr<FJsonObject> JsonBufferViewObject = GetJsonObjectFromRootIndex(
+        "bufferViews", BufferViewIndex);
+    if (!JsonBufferViewObject)
+    {
+        return false;
+    }
+
+    int64 BufferIndex;
+    if (!JsonBufferViewObject->TryGetNumberField(TEXT("buffer"), BufferIndex))
+    {
+        return false;
+    }
+
+    GetBuffer();
+
+    return true;
+}
+
+bool FGLTFParser::GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer)
+{
+    // if glb then data is in the BinaryBuffer
+    // else if gltf look at Json Buffers, will be inside the gltf file or separate with a reference to the .bin File
+}
+
 bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
 {
     auto Name = GetJsonObjectString(JsonNode, "name", FString::FromInt(NodeIndex));
@@ -260,7 +286,28 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                 return false;
             }
 
-            UE_LOG(LogTemp, Log, TEXT("POSITION accessor index: %d"), PositionAccessorIndex);
+            TSharedPtr<FJsonObject> JsonPositionAccessorObject = GetJsonObjectFromRootIndex(
+                "accessors",
+                PositionAccessorIndex);
+            if (!JsonPositionAccessorObject)
+            {
+                return false;
+            }
+
+            int64 PositionBufferViewIndex;
+            int64 PositionByteOffset = 0;
+            if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("bufferView"), PositionBufferViewIndex))
+            {
+                return false;
+            }
+            JsonPositionAccessorObject->TryGetNumberField(TEXT("byteOffset"), PositionByteOffset);
+
+            FBuffer Buffer;
+            int64 Stride;
+            if (!GetBufferView(PositionBufferViewIndex, Buffer, Stride))
+            {
+                return false;
+            }
         }
     }
 
