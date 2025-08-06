@@ -195,6 +195,144 @@ bool FGLTFParser::GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer)
     return false;
 }
 
+bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices)
+{
+    int64 PositionAccessorIndex;
+    if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("POSITION"), PositionAccessorIndex))
+    {
+        return true;
+    }
+
+    const TSharedPtr<FJsonObject> JsonPositionAccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        PositionAccessorIndex);
+    if (!JsonPositionAccessorObject)
+    {
+        return true;
+    }
+
+    int64 PositionCount;
+    if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("count"), PositionCount))
+    {
+        return true;
+    }
+
+    int64 PositionBufferViewIndex;
+    int64 PositionByteOffset = 0;
+    if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("bufferView"), PositionBufferViewIndex))
+    {
+        return true;
+    }
+    JsonPositionAccessorObject->TryGetNumberField(TEXT("byteOffset"), PositionByteOffset);
+
+    FBuffer PositionsBuffer;
+    if (!GetBufferView(PositionBufferViewIndex, PositionsBuffer))
+    {
+        return true;
+    }
+
+    const auto* Positions = reinterpret_cast<const float*>(
+        &PositionsBuffer.Data[PositionsBuffer.ByteOffset + PositionByteOffset]
+    );
+
+
+    Vertices.Reserve(PositionCount);
+
+    for (int i = 0; i < PositionCount; i++)
+    {
+        FVector Position(Positions[i * 3], Positions[i * 3 + 1], Positions[i * 3 + 2]);
+        Vertices.Add(Position);
+    }
+
+    return true;
+}
+
+// Note: Not the Accessor it's in the Primitive
+void FGLTFParser::GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject, TArray<int32>& Indices)
+{
+    int64 IndicesAccessorIndex;
+    if (!(*JsonPrimitiveObject)->TryGetNumberField(TEXT("indices"), IndicesAccessorIndex))
+    {
+        return;
+    }
+
+    const TSharedPtr<FJsonObject> JsonIndicesAccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        IndicesAccessorIndex);
+    if (!JsonIndicesAccessorObject)
+    {
+        return;
+    }
+
+    int64 IndicesCount;
+    if (!JsonIndicesAccessorObject->TryGetNumberField(TEXT("count"), IndicesCount))
+    {
+        return;
+    }
+
+    int64 IndicesBufferViewIndex;
+    int64 IndicesByteOffset = 0;
+    if (!JsonIndicesAccessorObject->TryGetNumberField(TEXT("bufferView"), IndicesBufferViewIndex))
+    {
+        return;
+    }
+    JsonIndicesAccessorObject->TryGetNumberField(TEXT("byteOffset"), IndicesByteOffset);
+
+    FBuffer IndicesBuffer;
+    if (!GetBufferView(IndicesBufferViewIndex, IndicesBuffer))
+    {
+        return;
+    }
+
+
+    Indices.Reserve(IndicesCount);
+
+    int64 ComponentType;
+    if (!JsonIndicesAccessorObject->TryGetNumberField(TEXT("componentType"), ComponentType))
+    {
+        return;
+    }
+
+    const auto* IndicesBufferData = &IndicesBuffer.Data[IndicesBuffer.ByteOffset + IndicesByteOffset];
+
+    switch (ComponentType)
+    {
+    case Gltf_Unsigned_Byte:
+        {
+            const auto* IndicesUint8 = IndicesBufferData;
+            for (size_t i = 0; i < IndicesCount; i++)
+            {
+                Indices.Add(IndicesUint8[i]);
+            }
+            break;
+        }
+    case Gltf_Unsigned_Short:
+        {
+            const auto* IndicesUint16 = reinterpret_cast<const uint16*>(IndicesBufferData);
+            for (size_t i = 0; i < IndicesCount; i++)
+            {
+                Indices.Add(IndicesUint16[i]);
+            }
+            break;
+        }
+    case Gltf_Unsigned_INT:
+        {
+            const auto* IndicesUint32 = reinterpret_cast<const uint32*>(IndicesBufferData);
+            for (size_t i = 0; i < IndicesCount; i++)
+            {
+                Indices.Add(IndicesUint32[i]);
+            }
+            break;
+        }
+    default:
+        {
+            UE_LOG(LogTemp, Error, TEXT("FGLTFParser::GetIndices::Error:: Invalid index accessor %d Not Supported."),
+                   ComponentType);
+        }
+    }
+}
+
+
 bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
 {
     auto Name = GetJsonObjectString(JsonNode, "name", FString::FromInt(NodeIndex));
@@ -316,53 +454,18 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                 return false;
             }
 
-            // Vertices
-            int64 PositionAccessorIndex;
-            if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("POSITION"), PositionAccessorIndex))
-            {
-                return false;
-            }
-
-            TSharedPtr<FJsonObject> JsonPositionAccessorObject = GetJsonObjectFromRootIndex(
-                "accessors",
-                PositionAccessorIndex);
-            if (!JsonPositionAccessorObject)
-            {
-                return false;
-            }
-
-            int64 PositionCount;
-            if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("count"), PositionCount))
-            {
-                return false;
-            }
-
-            int64 PositionBufferViewIndex;
-            int64 PositionByteOffset = 0;
-            if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("bufferView"), PositionBufferViewIndex))
-            {
-                return false;
-            }
-            JsonPositionAccessorObject->TryGetNumberField(TEXT("byteOffset"), PositionByteOffset);
-
-            FBuffer PositionsBuffer;
-            if (!GetBufferView(PositionBufferViewIndex, PositionsBuffer))
-            {
-                return false;
-            }
-
-            const auto* Positions = reinterpret_cast<const float*>(
-                &PositionsBuffer.Data[PositionsBuffer.ByteOffset + PositionByteOffset]
-            );
-
             TArray<FVector> Vertices;
-            Vertices.Reserve(PositionCount);
-
-            for (int i = 0; i < PositionCount; i++)
+            if (!GetVertices(JsonAttributesObject, Vertices))
             {
-                FVector Position(Positions[i * 3], Positions[i * 3 + 1], Positions[i * 3 + 2]);
-                Vertices.Add(Position);
+                return false;
             }
+
+            TArray<int32> Indices;
+            GetIndices(&JsonPrimitiveObject, Indices);
+
+            auto foo = Indices.Num();
+
+            auto foo2 = Indices.Num();
         }
     }
 

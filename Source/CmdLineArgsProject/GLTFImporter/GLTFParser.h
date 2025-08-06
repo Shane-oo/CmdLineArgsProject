@@ -74,6 +74,17 @@ private:
         }
     };
 
+    enum EGltfComponentType
+    {
+        Gltf_Byte = 5120,
+        Gltf_Unsigned_Byte = 5121,
+        Gltf_Short = 5122,
+        Gltf_Unsigned_Short = 5123,
+        Gltf_INT = 5124,
+        Gltf_Unsigned_INT = 5125,
+        Gltf_Float = 5126
+    };
+
     void CheckExtensionsRequired() const;
 
     static bool CheckJsonIndex(const TSharedPtr<FJsonObject>& JsonObject,
@@ -103,4 +114,8 @@ private:
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
     bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
+
+    bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
+
+    void GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject, TArray<int32>& Indices);
 };
