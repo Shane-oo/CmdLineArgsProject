@@ -72,4 +72,15 @@ private:
                                                           const int32 Index);
 
     TSharedPtr<FJsonObject> GetJsonObjectFromRootIndex(const FString& FieldName, const int32 Index) const;
+
+    static FString GetJsonObjectString(const TSharedPtr<FJsonObject>& JsonObject,
+                                       const FString& FieldName,
+                                       const FString& DefaultValue);
+
+    template <int32 Num, typename T>
+    static bool GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value);
+
+    static bool FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValues, FMatrix& Matrix);
+
+    bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
 };

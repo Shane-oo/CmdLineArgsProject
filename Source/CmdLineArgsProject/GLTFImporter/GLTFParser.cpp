@@ -67,6 +67,127 @@ TSharedPtr<FJsonObject> FGLTFParser::GetJsonObjectFromRootIndex(const FString& F
     return GetJsonObjectFromIndex(Root, FieldName, Index);
 }
 
+FString FGLTFParser::GetJsonObjectString(const TSharedPtr<FJsonObject>& JsonObject,
+                                         const FString& FieldName,
+                                         const FString& DefaultValue)
+{
+    FString Value;
+    if (!JsonObject->TryGetStringField(FieldName, Value))
+    {
+        return DefaultValue;
+    }
+
+    return Value;
+}
+
+template <int32 Num, typename T>
+bool FGLTFParser::GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value)
+{
+    if (JsonValues->Num() != Num)
+    {
+        // inputted incorrect size of vector i.e put 4 values for a Vector3D
+        return false;
+    }
+
+    for (int32 i = 0; i < Num; i++)
+    {
+        if (!(*JsonValues)[i]->TryGetNumber(Value[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool FGLTFParser::FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValues, FMatrix& Matrix)
+{
+    // Size of Matrix is 16 (4x4)
+    if (JsonValues->Num() != 16)
+    {
+        return false;
+    }
+
+    for (int32 i = 0; i < 16; i++)
+    {
+        float Value;
+        if (!(*JsonValues)[i]->TryGetNumber(Value))
+        {
+            return false;
+        }
+
+        Matrix.M[i / 4][i % 4] = Value;
+    }
+
+    return true;
+}
+
+bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
+{
+    auto Name = GetJsonObjectString(JsonNode, "name", FString::FromInt(NodeIndex));
+
+    FVector Translation(0, 0, 0);
+    FQuat Rotation(0, 0, 0, 1);
+    FVector Scale(1, 1, 1);
+
+    FMatrix Transform = FMatrix::Identity;
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonTranslationValues;
+        JsonNode->TryGetArrayField(TEXT("translation"), JsonTranslationValues))
+    {
+        if (!GetJsonVector<3>(JsonTranslationValues, Translation))
+        {
+            return false;
+        }
+    }
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonRotationValues;
+        JsonNode->TryGetArrayField(TEXT("rotation"), JsonRotationValues))
+    {
+        FVector4 Vector;
+        if (!GetJsonVector<4>(JsonRotationValues, Vector))
+        {
+            return false;
+        }
+
+        Rotation = {Vector.X, Vector.Y, Vector.Z, Vector.W};
+    }
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonScaleValues;
+        JsonNode->TryGetArrayField(TEXT("scale"), JsonScaleValues))
+    {
+        if (!GetJsonVector<3>(JsonScaleValues, Scale))
+        {
+            return false;
+        }
+    }
+
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonMatrixValues;
+        JsonNode->TryGetArrayField(TEXT("matrix"), JsonMatrixValues))
+    {
+        if (!FillJsonMatrix(JsonMatrixValues, Transform))
+        {
+            return false;
+        }
+    }
+    else
+    {
+        const auto RotationMatrix = Rotation.ToMatrix();
+
+        const auto XAxis = RotationMatrix.GetScaledAxis(EAxis::X) * Scale.X;
+        const auto YAxis = RotationMatrix.GetScaledAxis(EAxis::Y) * Scale.Y;
+        const auto ZAxis = RotationMatrix.GetScaledAxis(EAxis::Z) * Scale.Z;
+
+        Transform = FMatrix(XAxis, YAxis, ZAxis, Translation);
+    }
+
+
+    UE_LOG(LogTemp, Log, TEXT("Node %d Transform:\n%s"), NodeIndex, *Transform.ToString());
+
+    return true;
+}
+
 // #endregion
 
 // #region Constructors
@@ -253,20 +374,24 @@ bool FGLTFParser::LoadScene()
         const TArray<TSharedPtr<FJsonValue>>* JsonSceneNodes;
         if (JsonSceneObject->TryGetArrayField(TEXT("nodes"), JsonSceneNodes))
         {
-            for (TSharedPtr JsonSceneNode : *JsonSceneNodes)
+            for (int32 Index = 0; Index < JsonSceneNodes->Num(); Index++)
             {
-                int64 NodeIndex;
-                if (!JsonSceneNode->TryGetNumber(NodeIndex))
+                TSharedPtr<FJsonObject> JsonNodeObject = GetJsonObjectFromRootIndex("nodes", Index);
+
+                if (!JsonNodeObject)
                 {
                     return false;
                 }
 
-                UE_LOG(LogTemp, Display, TEXT("FGLTFParser::LoadScene::Display:: Loading Node %d"), NodeIndex);
+                if (!LoadNode(JsonNodeObject, Index))
+                {
+                    return false;
+                }
             }
         }
     }
 
-    return false;
+    return true;
 }
 
 // #endregion

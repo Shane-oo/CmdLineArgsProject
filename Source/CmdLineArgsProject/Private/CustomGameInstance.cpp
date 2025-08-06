@@ -37,16 +37,19 @@ void UCustomGameInstance::OnStart()
     }
 
 
-    auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+    /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/c5820f7eccca45a7a659356d42de3ab6.glb")
+    );*/
+
+    auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+        FString("/home/shane/Downloads/Fox.glb")
     );
 
     if (glTfAsset)
     {
         UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::glTF Imported"));
 
-        auto bModelLoaded = glTfAsset->LoadModel();
-        if (!bModelLoaded)
+        if (const auto bModelLoaded = glTfAsset->LoadModel(); !bModelLoaded)
         {
             UE_LOG(LogTemp, Error, TEXT("UCustomGameInstance::OnStart::Error:: Failed To Load Model"));
         }

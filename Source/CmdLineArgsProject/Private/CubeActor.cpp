@@ -63,7 +63,7 @@ void ACubeActor::Tick(float DeltaTime)
         //FString FileName = TEXT("screenshot.png");
 
 
-        FPaths::ScreenShotDir();
+        /*FPaths::ScreenShotDir();
         if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
         {
             //GetHighResScreenshotConfig().FilenameOverride = FileName;
@@ -79,10 +79,11 @@ void ACubeActor::Tick(float DeltaTime)
                                               FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(),
                                               FILEWRITE_Append);
             }
-        }
+        }*/
 
         // shutdown
         //FGenericPlatformMisc::RequestExit(false);
+        PictureTaken = true;
     }
 
     // Wait for the file to save?
