@@ -132,7 +132,7 @@ bool FGLTFParser::FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValue
     return true;
 }
 
-bool FGLTFParser::GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer) const
+bool FGLTFParser::GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer)
 {
     const TSharedPtr<FJsonObject> JsonBufferViewObject = GetJsonObjectFromRootIndex(
         "bufferViews", BufferViewIndex);
@@ -147,7 +147,34 @@ bool FGLTFParser::GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer)
         return false;
     }
 
-    GetBuffer();
+    FBuffer TotalBuffer;
+    if (!GetBuffer(BufferIndex, TotalBuffer))
+    {
+        return false;
+    }
+
+    int64 ByteLength;
+    if (!JsonBufferViewObject->TryGetNumberField(TEXT("byteLength"), ByteLength))
+    {
+        return false;
+    }
+
+    int64 ByteOffset;
+    if (!JsonBufferViewObject->TryGetNumberField(TEXT("byteOffset"), ByteOffset))
+    {
+        return false;
+    }
+
+    // byteStride? -> Not supporting Interleaved right now, 
+
+    if (ByteOffset + ByteLength > TotalBuffer.Num)
+    {
+        return false;
+    }
+
+    OutBuffer.Data = TotalBuffer.Data;
+    OutBuffer.Num = ByteLength;
+    OutBuffer.ByteOffset = ByteOffset;
 
     return true;
 }
@@ -156,6 +183,16 @@ bool FGLTFParser::GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer)
 {
     // if glb then data is in the BinaryBuffer
     // else if gltf look at Json Buffers, will be inside the gltf file or separate with a reference to the .bin File
+
+    if (BufferIndex == 0 && BinaryBuffer.Num() > 0)
+    {
+        OutBuffer.Data = BinaryBuffer.GetData();
+        OutBuffer.Num = BinaryBuffer.Num();
+        return true;
+    }
+
+    // todo look at the JsonBuffers (non-glb)
+    return false;
 }
 
 bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
@@ -294,6 +331,12 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                 return false;
             }
 
+            int64 PositionCount;
+            if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("count"), PositionCount))
+            {
+                return false;
+            }
+
             int64 PositionBufferViewIndex;
             int64 PositionByteOffset = 0;
             if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("bufferView"), PositionBufferViewIndex))
@@ -302,11 +345,23 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
             }
             JsonPositionAccessorObject->TryGetNumberField(TEXT("byteOffset"), PositionByteOffset);
 
-            FBuffer Buffer;
-            int64 Stride;
-            if (!GetBufferView(PositionBufferViewIndex, Buffer, Stride))
+            FBuffer PositionsBuffer;
+            if (!GetBufferView(PositionBufferViewIndex, PositionsBuffer))
             {
                 return false;
+            }
+
+            const auto* Positions = reinterpret_cast<const float*>(
+                &PositionsBuffer.Data[PositionsBuffer.ByteOffset + PositionByteOffset]
+            );
+
+            TArray<FVector> Vertices;
+            Vertices.Reserve(PositionCount);
+
+            for (int i = 0; i < PositionCount; i++)
+            {
+                FVector Position(Positions[i * 3], Positions[i * 3 + 1], Positions[i * 3 + 2]);
+                Vertices.Add(Position);
             }
         }
     }

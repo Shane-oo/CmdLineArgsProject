@@ -64,11 +64,13 @@ private:
     {
         uint8* Data;
         int64 Num;
+        int64 ByteOffset;
 
         FBuffer()
         {
             Data = nullptr;
             Num = 0;
+            ByteOffset = 0;
         }
     };
 
@@ -96,7 +98,7 @@ private:
 
     static bool FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValues, FMatrix& Matrix);
 
-    bool GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer) const;
+    bool GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer);
 
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
