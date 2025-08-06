@@ -118,4 +118,7 @@ private:
     bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
 
     void GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject, TArray<int32>& Indices);
+
+    void GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Normals);
+
 };

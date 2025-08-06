@@ -200,7 +200,7 @@ bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObjec
     int64 PositionAccessorIndex;
     if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("POSITION"), PositionAccessorIndex))
     {
-        return true;
+        return false;
     }
 
     const TSharedPtr<FJsonObject> JsonPositionAccessorObject = GetJsonObjectFromRootIndex(
@@ -208,27 +208,27 @@ bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObjec
         PositionAccessorIndex);
     if (!JsonPositionAccessorObject)
     {
-        return true;
+        return false;
     }
 
     int64 PositionCount;
     if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("count"), PositionCount))
     {
-        return true;
+        return false;
     }
 
     int64 PositionBufferViewIndex;
     int64 PositionByteOffset = 0;
     if (!JsonPositionAccessorObject->TryGetNumberField(TEXT("bufferView"), PositionBufferViewIndex))
     {
-        return true;
+        return false;
     }
     JsonPositionAccessorObject->TryGetNumberField(TEXT("byteOffset"), PositionByteOffset);
 
     FBuffer PositionsBuffer;
     if (!GetBufferView(PositionBufferViewIndex, PositionsBuffer))
     {
-        return true;
+        return false;
     }
 
     const auto* Positions = reinterpret_cast<const float*>(
@@ -329,6 +329,56 @@ void FGLTFParser::GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject,
             UE_LOG(LogTemp, Error, TEXT("FGLTFParser::GetIndices::Error:: Invalid index accessor %d Not Supported."),
                    ComponentType);
         }
+    }
+}
+
+void FGLTFParser::GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Normals)
+{
+    int64 NormalAccessorIndex;
+    if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("NORMAL"), NormalAccessorIndex))
+    {
+        return;
+    }
+
+    const TSharedPtr<FJsonObject> JsonNormalAccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        NormalAccessorIndex);
+    if (!JsonNormalAccessorObject)
+    {
+        return;
+    }
+
+    int64 NormalCount;
+    if (!JsonNormalAccessorObject->TryGetNumberField(TEXT("count"), NormalCount))
+    {
+        return;
+    }
+
+
+    int64 NormalBufferViewIndex;
+    int64 NormalByteOffset = 0;
+    if (!JsonNormalAccessorObject->TryGetNumberField(TEXT("bufferView"), NormalBufferViewIndex))
+    {
+        return;
+    }
+    JsonNormalAccessorObject->TryGetNumberField(TEXT("byteOffset"), NormalByteOffset);
+
+    FBuffer NormalBuffer;
+    if (!GetBufferView(NormalBufferViewIndex, NormalBuffer))
+    {
+        return;
+    }
+
+    const auto* NormalsData = reinterpret_cast<const float*>(
+        &NormalBuffer.Data[NormalBuffer.ByteOffset + NormalByteOffset]
+    );
+
+    Normals.Reserve(NormalCount);
+
+    for (int i = 0; i < NormalCount; i++)
+    {
+        FVector Normal(NormalsData[i * 3], NormalsData[i * 3 + 1], NormalsData[i * 3 + 2]);
+        Normals.Add(Normal);
     }
 }
 
@@ -463,9 +513,10 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
             TArray<int32> Indices;
             GetIndices(&JsonPrimitiveObject, Indices);
 
-            auto foo = Indices.Num();
+            TArray<FVector> Normals;
+            GetNormals(JsonAttributesObject, Normals);
 
-            auto foo2 = Indices.Num();
+            UE_LOG(LogTemp, Error, TEXT("Normals : %d"), Normals.Num());
         }
     }
 
