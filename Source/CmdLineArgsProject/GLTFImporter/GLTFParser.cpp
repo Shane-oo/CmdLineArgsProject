@@ -4,7 +4,12 @@
 
 #include "GLTFParser.h"
 
+#include "GLTFAsset.h"
+#include "GLTFStaticMeshComponent.h"
+
 // #region Private Methods
+
+class UGLTFStaticMeshComponent;
 
 void FGLTFParser::CheckExtensionsRequired() const
 {
@@ -231,7 +236,7 @@ bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObjec
         return false;
     }
 
-    const auto* Positions = reinterpret_cast<const float*>(
+    const auto* PositionsData = reinterpret_cast<const float*>(
         &PositionsBuffer.Data[PositionsBuffer.ByteOffset + PositionByteOffset]
     );
 
@@ -240,7 +245,7 @@ bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObjec
 
     for (int i = 0; i < PositionCount; i++)
     {
-        FVector Position(Positions[i * 3], Positions[i * 3 + 1], Positions[i * 3 + 2]);
+        FVector Position(PositionsData[i * 3], PositionsData[i * 3 + 1], PositionsData [i * 3 + 2]);
         Vertices.Add(Position);
     }
 
@@ -332,7 +337,7 @@ void FGLTFParser::GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject,
     }
 }
 
-void FGLTFParser::GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Normals)
+void FGLTFParser::GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Normals)
 {
     int64 NormalAccessorIndex;
     if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("NORMAL"), NormalAccessorIndex))
@@ -377,13 +382,208 @@ void FGLTFParser::GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject
 
     for (int i = 0; i < NormalCount; i++)
     {
-        FVector Normal(NormalsData[i * 3], NormalsData[i * 3 + 1], NormalsData[i * 3 + 2]);
+        FVector3f Normal(NormalsData[i * 3], NormalsData[i * 3 + 1], NormalsData[i * 3 + 2]);
         Normals.Add(Normal);
     }
 }
 
+void FGLTFParser::GetTangents(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector4f>& Tangents)
+{
+    int64 TangentAccessorIndex;
+    if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("TANGENT"), TangentAccessorIndex))
+    {
+        return;
+    }
 
-bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
+    const TSharedPtr<FJsonObject> JsonTangentAccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        TangentAccessorIndex);
+    if (!JsonTangentAccessorObject)
+    {
+        return;
+    }
+
+
+    int64 TangentCount;
+    if (!JsonTangentAccessorObject->TryGetNumberField(TEXT("count"), TangentCount))
+    {
+        return;
+    }
+
+    int64 TangentBufferViewIndex;
+    int64 TangentByteOffset = 0;
+    if (!JsonTangentAccessorObject->TryGetNumberField(TEXT("bufferView"), TangentBufferViewIndex))
+    {
+        return;
+    }
+    JsonTangentAccessorObject->TryGetNumberField(TEXT("byteOffset"), TangentByteOffset);
+
+    FBuffer TangentBuffer;
+    if (!GetBufferView(TangentBufferViewIndex, TangentBuffer))
+    {
+        return;
+    }
+
+    const auto* TangentData = reinterpret_cast<const float*>(
+        &TangentBuffer.Data[TangentBuffer.ByteOffset + TangentByteOffset]
+    );
+
+    Tangents.Reserve(TangentCount);
+
+    for (int i = 0; i < TangentCount; i++)
+    {
+        FVector4f Tangent(TangentData[i * 4], TangentData[i * 4 + 1], TangentData[i * 4 + 2], TangentData[i * 4 + 3]);
+        Tangents.Add(Tangent);
+    }
+}
+
+void FGLTFParser::GetTextureCoords(const TSharedPtr<FJsonObject>* JsonAttributesObject,
+                                   TArray<FVector2f>& TextureCoords,
+                                   const FString& TextureCoordField)
+{
+    int64 TextureCoord0AccessorIndex;
+    if (!(*JsonAttributesObject)->TryGetNumberField(TextureCoordField, TextureCoord0AccessorIndex))
+    {
+        return;
+    }
+
+    const TSharedPtr<FJsonObject> JsonTextureCoords0AccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        TextureCoord0AccessorIndex);
+    if (!JsonTextureCoords0AccessorObject)
+    {
+        return;
+    }
+
+
+    int64 TextureCoords0Count;
+    if (!JsonTextureCoords0AccessorObject->TryGetNumberField(TEXT("count"), TextureCoords0Count))
+    {
+        return;
+    }
+
+    int64 TextureCoords0BufferViewIndex;
+    int64 TextureCoords0ByteOffset = 0;
+    if (!JsonTextureCoords0AccessorObject->TryGetNumberField(TEXT("bufferView"), TextureCoords0BufferViewIndex))
+    {
+        return;
+    }
+    JsonTextureCoords0AccessorObject->TryGetNumberField(TEXT("byteOffset"), TextureCoords0ByteOffset);
+
+
+    FBuffer TextureCoords0Buffer;
+    if (!GetBufferView(TextureCoords0BufferViewIndex, TextureCoords0Buffer))
+    {
+        return;
+    }
+
+    const auto* TextureCoords0Data = reinterpret_cast<const float*>(
+        &TextureCoords0Buffer.Data[TextureCoords0Buffer.ByteOffset + TextureCoords0ByteOffset]
+    );
+
+    TextureCoords.Reserve(TextureCoords0Count);
+
+    for (int i = 0; i < TextureCoords0Count; i++)
+    {
+        FVector2f TextureCoord(TextureCoords0Data[i * 2], TextureCoords0Data[i * 2 + 1]);
+        TextureCoords.Add(TextureCoord);
+    }
+}
+
+void FGLTFParser::GetVertexColours(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Colours)
+{
+    int64 ColourAccessorIndex;
+    if (!(*JsonAttributesObject)->TryGetNumberField(TEXT("COLOR_0"), ColourAccessorIndex))
+    {
+        return;
+    }
+
+    const TSharedPtr<FJsonObject> JsonColourAccessorObject = GetJsonObjectFromRootIndex(
+        "accessors",
+        ColourAccessorIndex);
+    if (!JsonColourAccessorObject)
+    {
+        return;
+    }
+
+    int64 ColourCount;
+    if (!JsonColourAccessorObject->TryGetNumberField(TEXT("count"), ColourCount))
+    {
+        return;
+    }
+
+    int64 ColourBufferViewIndex;
+    int64 ColourByteOffset = 0;
+    if (!JsonColourAccessorObject->TryGetNumberField(TEXT("bufferView"), ColourBufferViewIndex))
+    {
+        return;
+    }
+    JsonColourAccessorObject->TryGetNumberField(TEXT("byteOffset"), ColourByteOffset);
+
+    FBuffer ColourBuffer;
+    if (!GetBufferView(ColourBufferViewIndex, ColourBuffer))
+    {
+        return;
+    }
+
+    Colours.Reserve(ColourCount);
+
+    int64 ComponentType;
+    if (!JsonColourAccessorObject->TryGetNumberField(TEXT("componentType"), ComponentType))
+    {
+        return;
+    }
+
+    const auto* ColourBufferData = &ColourBuffer.Data[ColourBuffer.ByteOffset + ColourByteOffset];
+
+    // what if colours_0 is a vec4 not a vec3. Accepting this for now as we dont normally use vertex colours anyone
+    // just adding for completeness
+    switch (ComponentType)
+    {
+    case Gltf_Float:
+        {
+            const auto* ColoursFloat = reinterpret_cast<const float*>(ColourBufferData);
+            for (size_t i = 0; i < ColourCount; i++)
+            {
+                FVector3f Colour(ColoursFloat[i * 3], ColoursFloat[i * 3 + 1], ColoursFloat[i * 3 + 2]);
+                Colours.Add(Colour);
+            }
+            break;
+        }
+
+    case Gltf_Unsigned_Byte:
+        {
+            const auto* ColoursUint8 = ColourBufferData;
+            for (size_t i = 0; i < ColourCount; i++)
+            {
+                FVector3f Colour(ColoursUint8[i * 3], ColoursUint8[i * 3 + 1], ColoursUint8[i * 3 + 2]);
+                Colours.Add(Colour);
+            }
+            break;
+        }
+
+    case Gltf_Unsigned_Short:
+        {
+            const auto* ColoursUint16 = reinterpret_cast<const uint16*>(ColourBufferData);
+            for (size_t i = 0; i < ColourCount; i++)
+            {
+                FVector3f Colour(ColoursUint16[i * 3], ColoursUint16[i * 3 + 1], ColoursUint16[i * 3 + 2]);
+                Colours.Add(Colour);
+            }
+            break;
+        }
+    default:
+        {
+            UE_LOG(LogTemp,
+                   Error,
+                   TEXT("FGLTFParser::GetVertexColours::Error:: Invalid vertex colour accessor %d Not Supported."),
+                   ComponentType);
+        }
+    }
+}
+
+
+bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
 {
     auto Name = GetJsonObjectString(JsonNode, "name", FString::FromInt(NodeIndex));
 
@@ -464,7 +664,7 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                 return false;
             }
 
-            if (!LoadNode(JsonNodeObject, ChildIndex))
+            if (!LoadNode(GlTFAsset, JsonNodeObject, ChildIndex))
             {
                 return false;
             }
@@ -513,10 +713,38 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
             TArray<int32> Indices;
             GetIndices(&JsonPrimitiveObject, Indices);
 
-            TArray<FVector> Normals;
+            TArray<FVector3f> Normals;
             GetNormals(JsonAttributesObject, Normals);
 
-            UE_LOG(LogTemp, Error, TEXT("Normals : %d"), Normals.Num());
+            // We don't do tangents right now, might need to compute using the funny algorithm
+            TArray<FVector4f> Tangents;
+            GetTangents(JsonAttributesObject, Tangents);
+
+            TArray<FVector2f> TextureCoords0;
+            GetTextureCoords(JsonAttributesObject, TextureCoords0, "TEXCOORD_0");
+
+            TArray<FVector2f> TextureCoords1;
+            GetTextureCoords(JsonAttributesObject, TextureCoords1, "TEXCOORD_1");
+
+            // We don't do Vertex Colours right now
+            TArray<FVector3f> Colours;
+            GetVertexColours(JsonAttributesObject, Colours);
+
+            //todo Get Material from list of materials
+
+            UGLTFStaticMeshComponent* GlTFStaticMesh = NewObject<UGLTFStaticMeshComponent>();
+
+            FString PrimitiveSuffix = PrimitiveCount == 0 ? TEXT("") : TEXT("_") + FString::FromInt(PrimitiveCount);
+
+
+            if (!GlTFStaticMesh->Init(Name + PrimitiveSuffix, Vertices, Indices))
+            {
+                return false;
+            }
+
+            GlTFStaticMeshes.Add(GlTFStaticMesh);
+
+            PrimitiveCount++;
         }
     }
 
@@ -686,7 +914,7 @@ TSharedPtr<FGLTFParser> FGLTFParser::CreateFromString(const FString& GlTFJsonDat
     return Parser;
 }
 
-bool FGLTFParser::LoadScene()
+bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
 {
     // Load Materials...
 
@@ -718,7 +946,7 @@ bool FGLTFParser::LoadScene()
                     return false;
                 }
 
-                if (!LoadNode(JsonNodeObject, Index))
+                if (!LoadNode(GlTFAsset, JsonNodeObject, Index))
                 {
                     return false;
                 }

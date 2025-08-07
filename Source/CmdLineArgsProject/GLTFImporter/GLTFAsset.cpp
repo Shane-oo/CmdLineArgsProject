@@ -20,7 +20,7 @@ bool UGLTFAsset::LoadFromFileName(const FString& FileName)
     return Parser != nullptr;
 }
 
-bool UGLTFAsset::LoadModel() const
+bool UGLTFAsset::LoadModel()
 {
     if (!Parser)
     {
@@ -30,7 +30,7 @@ bool UGLTFAsset::LoadModel() const
         return false;
     }
 
-    return Parser->LoadScene();
+    return Parser->LoadScene(this);
 }
 
 // #endregion

@@ -19,13 +19,18 @@ class CMDLINEARGSPROJECT_API UGLTFAsset : public UObject
 public:
     bool LoadFromFileName(const FString& FileName);
 
-    bool LoadModel() const;
+    bool LoadModel();
 
 protected:
     TSharedPtr<FGLTFParser> Parser;
 
 public:
-    TArray<TObjectPtr<UStaticMesh>> GetStaticMeshes() const
+    TArray<TObjectPtr<UGLTFStaticMeshComponent>> GetStaticMeshesOld() const
+    {
+        return Parser->GetStaticMeshesOLD();
+    }
+
+    TArray<UGLTFStaticMeshComponent*> GetStaticMeshComponents() const
     {
         return Parser->GetStaticMeshes();
     }

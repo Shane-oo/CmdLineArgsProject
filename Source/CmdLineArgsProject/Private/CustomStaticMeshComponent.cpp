@@ -24,7 +24,7 @@ void UCustomStaticMeshComponent::InitMesh(const bool UseRedMaterial)
 
     if (Material)
     {
-        SetMaterial(0, Material);
+        //SetMaterial(0, Material);
     }
 
     CubeMesh = LoadObject<UStaticMesh>(

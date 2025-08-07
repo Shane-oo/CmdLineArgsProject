@@ -106,4 +106,16 @@ void ACubeActor::Init() const
     CustomStaticMeshComponent->InitMesh(UseRedMaterial);
 }
 
+void ACubeActor::AddStaticMeshComponent(UStaticMeshComponent* NewStaticMeshComponent)
+{
+    // Change ownership to this Actor and add to the Root Component
+    if (NewStaticMeshComponent->GetOuter() != this)
+    {
+        NewStaticMeshComponent->Rename(nullptr, this);
+    }
+    NewStaticMeshComponent->SetupAttachment(Root);
+    NewStaticMeshComponent->RegisterComponent();
+    AddInstanceComponent(NewStaticMeshComponent);
+}
+
 // #endregion

@@ -39,4 +39,6 @@ private:
 
 public:
     void Init() const;
+
+    void AddStaticMeshComponent(UStaticMeshComponent* NewStaticMeshComponent) ;
 };

@@ -5,7 +5,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GLTFStaticMeshComponent.h"
 
+class UGLTFAsset;
 /**
  * 
  */
@@ -26,14 +28,16 @@ public:
 
     static TSharedPtr<FGLTFParser> CreateFromString(const FString& GlTFJsonData);
 
-    bool LoadScene();
+    bool LoadScene(UGLTFAsset* GlTFAsset);
 
 protected:
     TArray64<uint8> BinaryBuffer;
 
     TSharedPtr<FJsonObject> Root;
 
-    TMap<int32, TObjectPtr<UStaticMesh>> StaticMeshesCache;
+    TMap<int32, TObjectPtr<UGLTFStaticMeshComponent>> StaticMeshesCache;
+
+    TArray<UGLTFStaticMeshComponent*> GlTFStaticMeshes;
 
 public:
     virtual FString GetReferencerName() const override
@@ -46,17 +50,22 @@ public:
         this->BinaryBuffer = BinaryBuffer;
     }
 
-    TArray<TObjectPtr<UStaticMesh>> GetStaticMeshes()
+    TArray<TObjectPtr<UGLTFStaticMeshComponent>> GetStaticMeshesOLD()
     {
-        TArray<TObjectPtr<UStaticMesh>> Result;
+        TArray<TObjectPtr<UGLTFStaticMeshComponent>> Result;
         Result.Reserve(StaticMeshesCache.Num());
 
-        for (const TPair<int32, TObjectPtr<UStaticMesh>>& Pair : StaticMeshesCache)
+        for (const TPair<int32, TObjectPtr<UGLTFStaticMeshComponent>>& Pair : StaticMeshesCache)
         {
             Result.Add(Pair.Value);
         }
 
         return Result;
+    }
+
+    TArray<UGLTFStaticMeshComponent*> GetStaticMeshes()
+    {
+        return GlTFStaticMeshes;
     }
 
 private:
@@ -113,12 +122,19 @@ private:
 
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
-    bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
+    bool LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
 
     bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
 
     void GetIndices(const TSharedPtr<FJsonObject>* JsonPrimitiveObject, TArray<int32>& Indices);
 
-    void GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Normals);
+    void GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Normals);
 
+    void GetTangents(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector4f>& Tangents);
+
+    // TextureCoordField = TEXCOORD_0 OR TEXCOORD_1
+    void GetTextureCoords(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector2f>& TextureCoords,
+                          const FString& TextureCoordField);
+
+    void GetVertexColours(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Colours);
 };
