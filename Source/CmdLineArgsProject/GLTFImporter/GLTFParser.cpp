@@ -5,6 +5,7 @@
 #include "GLTFParser.h"
 
 #include "GLTFAsset.h"
+#include "GLTFMaterial.h"
 #include "GLTFStaticMeshComponent.h"
 
 // #region Private Methods
@@ -107,6 +108,20 @@ bool FGLTFParser::GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues
     for (int32 i = 0; i < Num; i++)
     {
         if (!(*JsonValues)[i]->TryGetNumber(Value[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+template <int32 Num, typename T>
+bool FGLTFParser::GetJsonVector(const TSharedPtr<FJsonValue>* JsonValue, T& Value)
+{
+    for (int32 i = 0; i < Num; i++)
+    {
+        if (!JsonValue[i]->TryGetNumber(Value[i]))
         {
             return false;
         }
@@ -722,7 +737,12 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
             TArray<FVector3f> Colours;
             GetVertexColours(JsonAttributesObject, Colours);
 
-            //todo Get Material from list of materials
+            UGLTFMaterial* Material = nullptr;
+            if (int64 MaterialIndexIndex;
+                JsonPrimitiveObject->TryGetNumberField(TEXT("material"), MaterialIndexIndex))
+            {
+                Material = MaterialIndexToMaterialMap[MaterialIndexIndex];
+            }
 
             UGLTFStaticMeshComponent* GlTFStaticMesh = NewObject<UGLTFStaticMeshComponent>();
 
@@ -734,7 +754,8 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                                             Indices,
                                             Normals,
                                             TextureCoords0,
-                                            Transform))
+                                            Transform,
+                                            Material))
             {
                 return false;
             }
@@ -750,7 +771,7 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
 
 void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex)
 {
-    FGlTMaterialProperties MaterialProperties{};
+    FGlTFMaterialProperties MaterialProperties{};
 
     if (!JsonMaterial->TryGetStringField(TEXT("name"), MaterialProperties.Name))
     {
@@ -773,6 +794,26 @@ void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 Mater
         JsonMaterial->TryGetNumberField(TEXT("alphaCutoff"), MaterialProperties.AlphaCutOff);
     }
     // else if not OPAQUE { Unsupported }
+
+    if (const TSharedPtr<FJsonObject>* JsonPbrObject;
+        JsonMaterial->TryGetObjectField(TEXT("pbrMetallicRoughness"), JsonPbrObject))
+    {
+        if (const TArray<TSharedPtr<FJsonValue>>* JsonBaseColourFactorArray;
+            (*JsonPbrObject)->TryGetArrayField(TEXT("baseColorFactor"), JsonBaseColourFactorArray))
+        {
+            GetJsonVector<4>(JsonBaseColourFactorArray, MaterialProperties.Colour);
+        }
+
+
+        (*JsonPbrObject)->TryGetNumberField(TEXT("roughnessFactor"), MaterialProperties.Roughness);
+        (*JsonPbrObject)->TryGetNumberField(TEXT("metallicFactor"), MaterialProperties.Metalness);
+    }
+
+    if (const auto GlTFMaterial = NewObject<UGLTFMaterial>(GetTransientPackage());
+        GlTFMaterial->CreateMaterial(MaterialProperties))
+    {
+        MaterialIndexToMaterialMap.Add(MaterialIndex, GlTFMaterial);
+    }
 }
 
 // #endregion

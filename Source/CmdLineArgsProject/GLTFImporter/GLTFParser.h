@@ -7,6 +7,8 @@
 #include "CoreMinimal.h"
 #include "GLTFStaticMeshComponent.h"
 
+class UGLTFMaterial;
+struct FGlTFMaterialProperties;
 class UGLTFAsset;
 /**
  * 
@@ -38,6 +40,8 @@ protected:
     TMap<int32, TObjectPtr<UGLTFStaticMeshComponent>> StaticMeshesCache;
 
     TArray<UGLTFStaticMeshComponent*> GlTFStaticMeshes;
+
+    TMap<int32, UGLTFMaterial*> MaterialIndexToMaterialMap;
 
 public:
     virtual FString GetReferencerName() const override
@@ -83,19 +87,6 @@ private:
         }
     };
 
-    struct FGlTMaterialProperties
-    {
-        FString Name;
-        bool bDoubleSided = false;
-
-        // OPAQUE - No transparency at all
-        // BLEND - Uses full alpha blending
-        // MASK - Uses alpha cutoff to discard pixels below a threshold
-        FString AlphaMode = "OPAQUE";
-        bool bTranslucent = false;
-        bool bMasked = false;
-        float AlphaCutOff = 0.5f;
-    };
 
     enum EGlTFComponentType
     {
@@ -130,6 +121,9 @@ private:
     template <int32 Num, typename T>
     static bool GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value);
 
+    template <int32 Num, typename T>
+    static bool GetJsonVector(const TSharedPtr<FJsonValue>* JsonValue, T& Value);
+
     static bool FillJsonMatrix(const TArray<TSharedPtr<FJsonValue>>* JsonValues, FMatrix& Matrix);
 
     bool GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer);
@@ -137,8 +131,6 @@ private:
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
     bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
-
-    void LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex);
 
     bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
 
@@ -153,4 +145,6 @@ private:
                           const FString& TextureCoordField);
 
     void GetVertexColours(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Colours);
+
+    void LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex);
 };

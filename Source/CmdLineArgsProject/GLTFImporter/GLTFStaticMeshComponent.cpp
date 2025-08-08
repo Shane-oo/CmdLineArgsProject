@@ -3,6 +3,7 @@
 
 #include "GLTFStaticMeshComponent.h"
 
+#include "GLTFMaterial.h"
 #include "MeshDescriptionBuilder.h"
 #include "StaticMeshAttributes.h"
 
@@ -14,7 +15,7 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
                                                               TArray<FVector3f> Normals,
                                                               TArray<FVector2f> TextureCoords0)
 {
-    GlTFStaticMesh = NewObject<UStaticMesh>(this, *FString::Printf(TEXT("SM_%s"), *Name));
+    ComputedStaticMesh = NewObject<UStaticMesh>(this, *FString::Printf(TEXT("SM_%s"), *Name));
 
     FMeshDescription MeshDescription;
     FStaticMeshAttributes Attributes(MeshDescription);
@@ -63,9 +64,9 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
         MeshDescriptionBuilder.AppendTriangle(V0, V2, V1, PolygonGroup);
     }
 
-    GlTFStaticMesh->BuildFromMeshDescriptions({&MeshDescription});
+    ComputedStaticMesh->BuildFromMeshDescriptions({&MeshDescription});
 
-    SetStaticMesh(GlTFStaticMesh);
+    SetStaticMesh(ComputedStaticMesh);
 }
 
 // #endregion
@@ -86,14 +87,19 @@ bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
                                           const TArray<int32>& Indices,
                                           const TArray<FVector3f>& Normals,
                                           const TArray<FVector2f>& TextureCoords0,
-                                          const FTransform& Transform)
+                                          const FTransform& Transform,
+                                          const UGLTFMaterial* GlTFMaterial)
 {
     this->Name = Name;
     SetRelativeTransform(Transform);
 
     CreateStaticMeshFromPrimitives(Name, Vertices, Indices, Normals, TextureCoords0);
 
-    // SetMaterial
+    if (GlTFMaterial)
+    {
+        ComputedMaterial = GlTFMaterial->GetMaterial();
+        SetMaterial(0, ComputedMaterial);
+    }
 
     return true;
 }
