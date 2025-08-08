@@ -3,11 +3,51 @@
 
 #include "GLTFMaterial.h"
 
+// #region Private Methods
+
+UMaterialInterface* UGLTFMaterial::GetBaseMaterialInterface(const FGlTFMaterialProperties& GlTFMaterialProperties)
+{
+    UMaterialInterface* BaseGlTFMaterial;
+
+    if (GlTFMaterialProperties.bTranslucent && GlTFMaterialProperties.bDoubleSided)
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(
+            nullptr, TEXT("/Game/M_GlTF_Translucent_DoubleSided_BaseMaterial")
+        );
+    }
+    else if (GlTFMaterialProperties.bMasked && GlTFMaterialProperties.bDoubleSided)
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(
+            nullptr, TEXT("/Game/M_GlTF_Masked_DoubleSided_BaseMaterial")
+        );
+    }
+    else if (GlTFMaterialProperties.bTranslucent)
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_Translucent_BaseMaterial"));
+    }
+    else if (GlTFMaterialProperties.bMasked)
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_Masked_BaseMaterial"));
+    }
+    else if (GlTFMaterialProperties.bDoubleSided)
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_DoubleSided_BaseMaterial"));
+    }
+    else
+    {
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_BaseMaterial"));
+    }
+
+    return BaseGlTFMaterial;
+}
+
+// #endregion
+
 // #region Public Methods
 
 bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialProperties)
 {
-    UMaterialInterface* BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_BaseMaterial"));
+    UMaterialInterface* BaseGlTFMaterial = GetBaseMaterialInterface(GlTFMaterialProperties);
     if (!BaseGlTFMaterial)
     {
         UE_LOG(LogTemp,
@@ -24,12 +64,18 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     );
 
     DynamicMaterial->SetVectorParameterValue("glTFColour", GlTFMaterialProperties.Colour);
+    DynamicMaterial->SetScalarParameterValue("glTFRoughness", GlTFMaterialProperties.Roughness);
+    DynamicMaterial->SetScalarParameterValue("glTFMetalness", GlTFMaterialProperties.Metalness);
 
+    DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
+
+    DynamicMaterial->SetScalarParameterValue("gltfAlphaCutOff", GlTFMaterialProperties.AlphaCutOff);
 
     // Compile the material
     DynamicMaterial->PostEditChange();
 
     return true;
 }
+
 
 // #endregion

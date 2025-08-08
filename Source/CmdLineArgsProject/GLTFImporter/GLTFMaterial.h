@@ -11,10 +11,7 @@ struct FGlTFMaterialProperties
     FString Name;
     bool bDoubleSided = false;
 
-    // OPAQUE - No transparency at all
-    // BLEND - Uses full alpha blending
-    // MASK - Uses alpha cutoff to discard pixels below a threshold
-    FString AlphaMode = "OPAQUE";
+
     bool bTranslucent = false;
     bool bMasked = false;
     float AlphaCutOff = 0.5f;
@@ -22,6 +19,8 @@ struct FGlTFMaterialProperties
     FVector4 Colour = FVector4(1.0f, 1.0f, 1.0f, 1.0f); // White
     float Roughness = 1.0f;
     float Metalness = 0.0f;
+
+    FVector EmissiveColour = FVector(0.0f);
 };
 
 /**
@@ -44,4 +43,7 @@ public:
     {
         return DynamicMaterial;
     }
+
+private:
+    static UMaterialInterface* GetBaseMaterialInterface(const FGlTFMaterialProperties& GlTFMaterialProperties);
 };

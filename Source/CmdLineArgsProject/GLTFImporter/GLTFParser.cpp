@@ -781,14 +781,17 @@ void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 Mater
 
     JsonMaterial->TryGetBoolField(TEXT("doubleSided"), MaterialProperties.bDoubleSided);
 
-    JsonMaterial->TryGetStringField(TEXT("alphaMode"), MaterialProperties.AlphaMode);
+    // OPAQUE - No transparency at all
+    // BLEND - Uses full alpha blending
+    // MASK - Uses alpha cutoff to discard pixels below a threshold
+    FString AlphaMode = "OPAQUE";
+    JsonMaterial->TryGetStringField(TEXT("alphaMode"), AlphaMode);
 
-
-    if (MaterialProperties.AlphaMode == "BLEND")
+    if (AlphaMode == "BLEND")
     {
         MaterialProperties.bTranslucent = true;
     }
-    else if (MaterialProperties.AlphaMode == "MASK")
+    else if (AlphaMode == "MASK")
     {
         MaterialProperties.bMasked = true;
         JsonMaterial->TryGetNumberField(TEXT("alphaCutoff"), MaterialProperties.AlphaCutOff);
@@ -807,6 +810,12 @@ void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 Mater
 
         (*JsonPbrObject)->TryGetNumberField(TEXT("roughnessFactor"), MaterialProperties.Roughness);
         (*JsonPbrObject)->TryGetNumberField(TEXT("metallicFactor"), MaterialProperties.Metalness);
+    }
+
+    if (const TArray<TSharedPtr<FJsonValue>>* JsonEmissiveFactorArray;
+        JsonMaterial->TryGetArrayField(TEXT("emissiveFactor"), JsonEmissiveFactorArray))
+    {
+        GetJsonVector<3>(JsonEmissiveFactorArray, MaterialProperties.EmissiveColour);
     }
 
     if (const auto GlTFMaterial = NewObject<UGLTFMaterial>(GetTransientPackage());
