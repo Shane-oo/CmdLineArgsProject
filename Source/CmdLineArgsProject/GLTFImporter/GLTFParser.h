@@ -28,7 +28,7 @@ public:
 
     static TSharedPtr<FGLTFParser> CreateFromString(const FString& GlTFJsonData);
 
-    bool LoadScene(UGLTFAsset* GlTFAsset);
+    bool LoadScene();
 
 protected:
     TArray64<uint8> BinaryBuffer;
@@ -83,7 +83,21 @@ private:
         }
     };
 
-    enum EGltfComponentType
+    struct FGlTMaterialProperties
+    {
+        FString Name;
+        bool bDoubleSided = false;
+
+        // OPAQUE - No transparency at all
+        // BLEND - Uses full alpha blending
+        // MASK - Uses alpha cutoff to discard pixels below a threshold
+        FString AlphaMode = "OPAQUE";
+        bool bTranslucent = false;
+        bool bMasked = false;
+        float AlphaCutOff = 0.5f;
+    };
+
+    enum EGlTFComponentType
     {
         Gltf_Byte = 5120,
         Gltf_Unsigned_Byte = 5121,
@@ -122,7 +136,9 @@ private:
 
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
 
-    bool LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
+    bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
+
+    void LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex);
 
     bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
 

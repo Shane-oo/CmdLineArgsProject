@@ -19,7 +19,7 @@ class CMDLINEARGSPROJECT_API UGLTFAsset : public UObject
 public:
     bool LoadFromFileName(const FString& FileName);
 
-    bool LoadModel();
+    bool LoadModel() const;
 
 protected:
     TSharedPtr<FGLTFParser> Parser;

@@ -37,19 +37,18 @@ void UCustomGameInstance::OnStart()
     }
 
 
+    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/c5820f7eccca45a7a659356d42de3ab6.glb")
-    );
+    );*/
 
     /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/VulkanSampleScene.glb")
     );*/
 
-    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/DamagedHelmet.glb")
     );
-    */
 
     if (glTfAsset)
     {

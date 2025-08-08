@@ -583,7 +583,7 @@ void FGLTFParser::GetVertexColours(const TSharedPtr<FJsonObject>* JsonAttributes
 }
 
 
-bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
+bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
 {
     auto Name = GetJsonObjectString(JsonNode, "name", FString::FromInt(NodeIndex));
 
@@ -657,7 +657,7 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
                 return false;
             }
 
-            if (!LoadNode(GlTFAsset, JsonNodeObject, ChildIndex))
+            if (!LoadNode(JsonNodeObject, ChildIndex))
             {
                 return false;
             }
@@ -746,6 +746,33 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
     }
 
     return true;
+}
+
+void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex)
+{
+    FGlTMaterialProperties MaterialProperties{};
+
+    if (!JsonMaterial->TryGetStringField(TEXT("name"), MaterialProperties.Name))
+    {
+        // When no Material Name 
+        MaterialProperties.Name = FString("Material_") + FString::FromInt(MaterialIndex);;
+    }
+
+    JsonMaterial->TryGetBoolField(TEXT("doubleSided"), MaterialProperties.bDoubleSided);
+
+    JsonMaterial->TryGetStringField(TEXT("alphaMode"), MaterialProperties.AlphaMode);
+
+
+    if (MaterialProperties.AlphaMode == "BLEND")
+    {
+        MaterialProperties.bTranslucent = true;
+    }
+    else if (MaterialProperties.AlphaMode == "MASK")
+    {
+        MaterialProperties.bMasked = true;
+        JsonMaterial->TryGetNumberField(TEXT("alphaCutoff"), MaterialProperties.AlphaCutOff);
+    }
+    // else if not OPAQUE { Unsupported }
 }
 
 // #endregion
@@ -911,11 +938,23 @@ TSharedPtr<FGLTFParser> FGLTFParser::CreateFromString(const FString& GlTFJsonDat
     return Parser;
 }
 
-bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
+bool FGLTFParser::LoadScene()
 {
     // Load Materials...
+    const TArray<TSharedPtr<FJsonValue>>* Materials;
+    Root->TryGetArrayField(TEXT("materials"), Materials);
+    for (int32 MaterialIndex = 0; MaterialIndex < Materials->Num(); MaterialIndex++)
+    {
+        TSharedPtr<FJsonObject> JsonMaterialObject = (*Materials)[MaterialIndex]->AsObject();
 
-    
+        if (!JsonMaterialObject)
+        {
+            continue;
+        }
+
+        LoadMaterial(JsonMaterialObject, MaterialIndex);
+    }
+
 
     // Load All scenes => Usually just 1 with an index of 0
     const TArray<TSharedPtr<FJsonValue>>* JsonScenes;
@@ -945,7 +984,7 @@ bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
                     return false;
                 }
 
-                if (!LoadNode(GlTFAsset, JsonNodeObject, Index))
+                if (!LoadNode(JsonNodeObject, Index))
                 {
                     return false;
                 }
