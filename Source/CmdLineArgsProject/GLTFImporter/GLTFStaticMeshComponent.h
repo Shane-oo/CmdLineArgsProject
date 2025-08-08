@@ -17,7 +17,12 @@ class CMDLINEARGSPROJECT_API UGLTFStaticMeshComponent : public UStaticMeshCompon
 public:
     UGLTFStaticMeshComponent();
 
-    bool Init(FString Name, TArray<FVector> Vertices, TArray<int32> Indices);
+    bool CreateMesh(FString Name,
+                    const TArray<FVector>& Vertices,
+                    const TArray<int32>& Indices,
+                    const TArray<FVector3f>& Normals,
+                    const TArray<FVector2f>& TextureCoords0,
+                    const FTransform& Transform);
 
 private:
     FString Name;
@@ -27,4 +32,11 @@ private:
 
     UPROPERTY(EditAnywhere)
     UStaticMesh* GlTFStaticMesh;
+
+private:
+    void CreateStaticMeshFromPrimitives(const FString& Name,
+                                        TArray<FVector> Vertices,
+                                        TArray<int32> Indices,
+                                        TArray<FVector3f> Normals,
+                                        TArray<FVector2f> TextureCoords0);
 };

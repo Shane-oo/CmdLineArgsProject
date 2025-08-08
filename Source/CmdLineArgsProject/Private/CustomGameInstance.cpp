@@ -37,13 +37,19 @@ void UCustomGameInstance::OnStart()
     }
 
 
-    /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+    auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/c5820f7eccca45a7a659356d42de3ab6.glb")
+    );
+
+    /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+        FString("/home/shane/Downloads/VulkanSampleScene.glb")
     );*/
 
+    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
-        FString("/home/shane/Downloads/VulkanSampleScene.glb")
+        FString("/home/shane/Downloads/DamagedHelmet.glb")
     );
+    */
 
     if (glTfAsset)
     {
@@ -55,12 +61,12 @@ void UCustomGameInstance::OnStart()
         }
         else
         {
-            auto foo = glTfAsset->GetStaticMeshComponents();
+            auto glTfStaticMeshComponents = glTfAsset->GetStaticMeshComponents();
             UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::OnStart::Display:: %d Static Meshes Loaded"),
-                   foo.Num());
+                   glTfStaticMeshComponents.Num());
 
 
-            for (const auto StaticMeshComponent : foo)
+            for (const auto StaticMeshComponent : glTfStaticMeshComponents)
             {
                 CubeActor->AddStaticMeshComponent(StaticMeshComponent);
             }

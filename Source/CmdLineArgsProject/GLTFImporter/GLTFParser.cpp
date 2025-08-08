@@ -245,7 +245,7 @@ bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObjec
 
     for (int i = 0; i < PositionCount; i++)
     {
-        FVector Position(PositionsData[i * 3], PositionsData[i * 3 + 1], PositionsData [i * 3 + 2]);
+        FVector Position(PositionsData[i * 3], PositionsData[i * 3 + 1], PositionsData[i * 3 + 2]);
         Vertices.Add(Position);
     }
 
@@ -591,7 +591,7 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
     FQuat Rotation(0, 0, 0, 1);
     FVector Scale(1, 1, 1);
 
-    FMatrix Transform = FMatrix::Identity;
+    FTransform Transform = FTransform::Identity;
 
     if (const TArray<TSharedPtr<FJsonValue>>* JsonTranslationValues;
         JsonNode->TryGetArrayField(TEXT("translation"), JsonTranslationValues))
@@ -623,28 +623,21 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
         }
     }
 
-
     if (const TArray<TSharedPtr<FJsonValue>>* JsonMatrixValues;
         JsonNode->TryGetArrayField(TEXT("matrix"), JsonMatrixValues))
     {
-        if (!FillJsonMatrix(JsonMatrixValues, Transform))
+        FMatrix Matrix = FMatrix::Identity;
+        if (!FillJsonMatrix(JsonMatrixValues, Matrix))
         {
             return false;
         }
+
+        Transform = FTransform(Matrix);
     }
     else
     {
-        const auto RotationMatrix = Rotation.ToMatrix();
-
-        const auto XAxis = RotationMatrix.GetScaledAxis(EAxis::X) * Scale.X;
-        const auto YAxis = RotationMatrix.GetScaledAxis(EAxis::Y) * Scale.Y;
-        const auto ZAxis = RotationMatrix.GetScaledAxis(EAxis::Z) * Scale.Z;
-
-        Transform = FMatrix(XAxis, YAxis, ZAxis, Translation);
+        Transform = FTransform(Rotation, Translation, Scale);
     }
-
-
-    //UE_LOG(LogTemp, Log, TEXT("Node %d Transform:\n%s"), NodeIndex, *Transform.ToString());
 
     if (const TArray<TSharedPtr<FJsonValue>>* JsonChildren;
         JsonNode->TryGetArrayField(TEXT("children"), JsonChildren))
@@ -670,7 +663,6 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
             }
         }
     }
-
 
     if (const auto MeshIndex = GetJsonObjectIndex(JsonNode, TEXT("mesh"));
         MeshIndex != -1)
@@ -737,7 +729,12 @@ bool FGLTFParser::LoadNode(UGLTFAsset* GlTFAsset, TSharedPtr<FJsonObject> JsonNo
             FString PrimitiveSuffix = PrimitiveCount == 0 ? TEXT("") : TEXT("_") + FString::FromInt(PrimitiveCount);
 
 
-            if (!GlTFStaticMesh->Init(Name + PrimitiveSuffix, Vertices, Indices))
+            if (!GlTFStaticMesh->CreateMesh(Name + PrimitiveSuffix,
+                                            Vertices,
+                                            Indices,
+                                            Normals,
+                                            TextureCoords0,
+                                            Transform))
             {
                 return false;
             }
@@ -918,6 +915,8 @@ bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
 {
     // Load Materials...
 
+    
+
     // Load All scenes => Usually just 1 with an index of 0
     const TArray<TSharedPtr<FJsonValue>>* JsonScenes;
     if (!Root->TryGetArrayField(TEXT("scenes"), JsonScenes))
@@ -928,7 +927,7 @@ bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
 
     for (int32 SceneIndex = 0; SceneIndex < JsonScenes->Num(); SceneIndex++)
     {
-        TSharedPtr<FJsonObject> JsonSceneObject = GetJsonObjectFromRootIndex("scenes", SceneIndex);
+        const TSharedPtr<FJsonObject> JsonSceneObject = GetJsonObjectFromRootIndex("scenes", SceneIndex);
         if (!JsonSceneObject)
         {
             return false;
@@ -939,7 +938,7 @@ bool FGLTFParser::LoadScene(UGLTFAsset* GlTFAsset)
         {
             for (int32 Index = 0; Index < JsonSceneNodes->Num(); Index++)
             {
-                TSharedPtr<FJsonObject> JsonNodeObject = GetJsonObjectFromRootIndex("nodes", Index);
+                const TSharedPtr<FJsonObject> JsonNodeObject = GetJsonObjectFromRootIndex("nodes", Index);
 
                 if (!JsonNodeObject)
                 {

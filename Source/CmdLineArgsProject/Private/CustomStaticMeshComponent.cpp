@@ -31,7 +31,7 @@ void UCustomStaticMeshComponent::InitMesh(const bool UseRedMaterial)
         nullptr, TEXT("/Game/Low_Poly_Viking_Interiors/Models/Props/SM_Skull_Deer_01.SM_Skull_Deer_01"));
     if (CubeMesh)
     {
-        SetStaticMesh(CubeMesh);
+        //SetStaticMesh(CubeMesh);
     }
 
     float ScaleX;

@@ -6,21 +6,14 @@
 #include "MeshDescriptionBuilder.h"
 #include "StaticMeshAttributes.h"
 
+// #region Private Methods
 
-// #region Constructors
-
-UGLTFStaticMeshComponent::UGLTFStaticMeshComponent()
+void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Name,
+                                                              TArray<FVector> Vertices,
+                                                              TArray<int32> Indices,
+                                                              TArray<FVector3f> Normals,
+                                                              TArray<FVector2f> TextureCoords0)
 {
-}
-
-// #endregion
-
-// #region Public Methods
-
-bool UGLTFStaticMeshComponent::Init(FString Name, TArray<FVector> Vertices, TArray<int32> Indices)
-{
-    this->Name = Name;
-
     GlTFStaticMesh = NewObject<UStaticMesh>(this, *FString::Printf(TEXT("SM_%s"), *Name));
 
     FMeshDescription MeshDescription;
@@ -34,40 +27,73 @@ bool UGLTFStaticMeshComponent::Init(FString Name, TArray<FVector> Vertices, TArr
 
     // Create Vertices
     TArray<FVertexID> VertexIds;
+    TArray<FVertexInstanceID> VertexInstanceIds; // One instance per vertex
+
     VertexIds.Reserve(Vertices.Num());
-    for (const auto Vertex : Vertices)
+    VertexInstanceIds.Reserve(Vertices.Num());
+
+    for (int32 i = 0; i < Vertices.Num(); ++i)
     {
-        VertexIds.Add(MeshDescriptionBuilder.AppendVertex(Vertex));
+        const FVertexID VertexID = MeshDescriptionBuilder.AppendVertex(Vertices[i]);
+        VertexIds.Add(VertexID);
+
+        const FVertexInstanceID InstanceID = MeshDescriptionBuilder.AppendInstance(VertexID);
+        VertexInstanceIds.Add(InstanceID);
+
+        if (!Normals.IsEmpty())
+        {
+            Attributes.GetVertexInstanceNormals()[InstanceID] = Normals[i];
+        }
+
+        if (!TextureCoords0.IsEmpty())
+        {
+            Attributes.GetVertexInstanceUVs()[InstanceID] = TextureCoords0[i];
+        }
     }
 
     // Build Triangles
-    FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup();
+    const FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup();
     for (int32 i = 0; i < Indices.Num(); i += 3)
     {
         const FVertexInstanceID V0 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 0]]);
         const FVertexInstanceID V1 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 1]]);
         const FVertexInstanceID V2 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 2]]);
 
-        // Set attributes here
-        /*
-        Attributes.GetVertexInstanceNormals()[V0] = Normals[Indices[i + 0]];
-        Attributes.GetVertexInstanceNormals()[V1] = Normals[Indices[i + 1]];
-        Attributes.GetVertexInstanceNormals()[V2] = Normals[Indices[i + 2]];
-
-        Attributes.GetVertexInstanceUVs()[V0][0] = UVs[Indices[i + 0]];
-        Attributes.GetVertexInstanceUVs()[V1][0] = UVs[Indices[i + 1]];
-        Attributes.GetVertexInstanceUVs()[V2][0] = UVs[Indices[i + 2]];
-        */
-
-        // Create the triangle from these vertex instances
-        MeshDescriptionBuilder.AppendTriangle(V0, V1, V2, PolygonGroup);
+        //Unreal uses counter-clockwise (CCW) winding order
+        MeshDescriptionBuilder.AppendTriangle(V0, V2, V1, PolygonGroup);
     }
 
     GlTFStaticMesh->BuildFromMeshDescriptions({&MeshDescription});
 
     SetStaticMesh(GlTFStaticMesh);
+}
 
-    // Add Material at end
+// #endregion
+
+// #region Constructors
+
+UGLTFStaticMeshComponent::UGLTFStaticMeshComponent()
+{
+}
+
+// #endregion
+
+// #region Public Methods
+
+
+bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
+                                          const TArray<FVector>& Vertices,
+                                          const TArray<int32>& Indices,
+                                          const TArray<FVector3f>& Normals,
+                                          const TArray<FVector2f>& TextureCoords0,
+                                          const FTransform& Transform)
+{
+    this->Name = Name;
+    SetRelativeTransform(Transform);
+
+    CreateStaticMeshFromPrimitives(Name, Vertices, Indices, Normals, TextureCoords0);
+
+    // SetMaterial
 
     return true;
 }

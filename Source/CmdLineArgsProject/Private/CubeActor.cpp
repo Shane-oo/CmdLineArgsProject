@@ -21,6 +21,11 @@ ACubeActor::ACubeActor()
 
     CustomStaticMeshComponent = CreateDefaultSubobject<UCustomStaticMeshComponent>(TEXT("CustomStaticMeshComponent"));
     CustomStaticMeshComponent->SetupAttachment(Root);
+
+    // my stuff is small
+    FTransform Transform;
+    Transform.SetScale3D(FVector(100));
+    SetActorTransform(Transform);
 }
 
 // #endregion
