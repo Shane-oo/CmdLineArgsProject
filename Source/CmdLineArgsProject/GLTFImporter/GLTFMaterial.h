@@ -54,5 +54,5 @@ private:
     static UMaterialInterface* GetBaseMaterialInterface(const FGlTFMaterialProperties& GlTFMaterialProperties);
 
     // todo down the track defs need a texture cache
-    UTexture2D* BuildTexture(FGLTFParser::FGlTFTexture GlTFTexture, UMaterialInterface* MaterialParent);
+    static UTexture2D* BuildTexture(FGLTFParser::FGlTFTexture GlTFTexture, UMaterialInterface* MaterialParent);
 };

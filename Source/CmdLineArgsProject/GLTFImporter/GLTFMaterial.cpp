@@ -101,7 +101,6 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         return false;
     }
 
-
     DynamicMaterial = UMaterialInstanceDynamic::Create(
         BaseGlTFMaterial,
         GetTransientPackage(),
@@ -116,10 +115,10 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
 
     DynamicMaterial->SetScalarParameterValue("gltfAlphaCutOff", GlTFMaterialProperties.AlphaCutOff);
 
-    if (auto DiffuseTexture = BuildTexture(GlTFMaterialProperties.DiffuseTexture, DynamicMaterial))
+    if (const auto DiffuseTexture = BuildTexture(GlTFMaterialProperties.DiffuseTexture, DynamicMaterial))
     {
-        // apply diffuse texture
-        DynamicMaterial->SetTextureParameterValue("diffuseTexture", DiffuseTexture);
+        DynamicMaterial->SetScalarParameterValue("useGlTFDiffuseTexture", 1.0f);
+        DynamicMaterial->SetTextureParameterValue("glTFDiffuseTexture", DiffuseTexture);
     }
 
     // Compile the material

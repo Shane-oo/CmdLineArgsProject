@@ -33,6 +33,9 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
     VertexIds.Reserve(Vertices.Num());
     VertexInstanceIds.Reserve(Vertices.Num());
 
+    const auto VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+    const auto VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
     for (int32 i = 0; i < Vertices.Num(); ++i)
     {
         const FVertexID VertexID = MeshDescriptionBuilder.AppendVertex(Vertices[i]);
@@ -43,12 +46,12 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
 
         if (!Normals.IsEmpty())
         {
-            Attributes.GetVertexInstanceNormals()[InstanceID] = Normals[i];
+            VertexInstanceNormals.Set(InstanceID, Normals[i]);
         }
 
         if (!TextureCoords0.IsEmpty())
         {
-            Attributes.GetVertexInstanceUVs()[InstanceID] = TextureCoords0[i];
+            VertexInstanceUVs.Set(InstanceID, 0, TextureCoords0[i]);
         }
     }
 
