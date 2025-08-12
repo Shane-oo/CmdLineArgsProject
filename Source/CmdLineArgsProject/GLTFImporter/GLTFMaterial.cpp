@@ -41,6 +41,51 @@ UMaterialInterface* UGLTFMaterial::GetBaseMaterialInterface(const FGlTFMaterialP
     return BaseGlTFMaterial;
 }
 
+UTexture2D* UGLTFMaterial::BuildTexture(FGLTFParser::FGlTFTexture GlTFTexture, UMaterialInterface* MaterialParent)
+{
+    if (!GlTFTexture.bIsValid || GlTFTexture.MipMappings.Num() == 0)
+    {
+        return nullptr;
+    }
+
+    UTexture2D* Texture = NewObject<UTexture2D>(MaterialParent, NAME_None, RF_Public);
+
+    FTexturePlatformData* PlatformData = new FTexturePlatformData();
+    PlatformData->SizeX = GlTFTexture.MipMappings[0].Width;
+    PlatformData->SizeY = GlTFTexture.MipMappings[0].Height;
+    PlatformData->PixelFormat = GlTFTexture.MipMappings[0].PixelFormat;
+
+    Texture->SetPlatformData(PlatformData);
+
+    // Load in Texture immediately
+    Texture->NeverStream = true;
+
+    for (const auto& GlTFMipMap : GlTFTexture.MipMappings)
+    {
+        FTexture2DMipMap* MipMap = new FTexture2DMipMap;
+        PlatformData->Mips.Add(MipMap);
+        MipMap->SizeX = GlTFMipMap.Width;
+        MipMap->SizeY = GlTFMipMap.Height;
+
+        MipMap->BulkData.Lock(LOCK_READ_WRITE);
+
+        uint8* Data = MipMap->BulkData.Realloc(GlTFMipMap.Pixels.Num());
+
+        FMemory::Memcpy(Data, GlTFMipMap.Pixels.GetData(), GlTFMipMap.Pixels.Num());
+
+        MipMap->BulkData.Unlock();
+    }
+
+    Texture->SRGB = GlTFTexture.bIsSRGB;
+
+    //    Texture->AddressX = Sampler.TileX;
+    //    Texture->AddressY = Sampler.TileY;
+
+    Texture->UpdateResource();
+
+    return Texture;
+}
+
 // #endregion
 
 // #region Public Methods
@@ -70,6 +115,12 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
 
     DynamicMaterial->SetScalarParameterValue("gltfAlphaCutOff", GlTFMaterialProperties.AlphaCutOff);
+
+    if (auto DiffuseTexture = BuildTexture(GlTFMaterialProperties.DiffuseTexture, DynamicMaterial))
+    {
+        // apply diffuse texture
+        DynamicMaterial->SetTextureParameterValue("diffuseTexture", DiffuseTexture);
+    }
 
     // Compile the material
     DynamicMaterial->PostEditChange();

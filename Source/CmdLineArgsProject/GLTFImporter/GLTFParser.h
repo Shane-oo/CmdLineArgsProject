@@ -44,6 +44,35 @@ protected:
     TMap<int32, UGLTFMaterial*> MaterialIndexToMaterialMap;
 
 public:
+    struct FGlTFMipMapping
+    {
+        const int32 TextureIndex;
+        TArray<uint8> Pixels;
+        int32 Width;
+        int32 Height;
+        EPixelFormat PixelFormat;
+
+        FGlTFMipMapping(const int32 InTextureIndex,
+                        const EPixelFormat InPixelFormat,
+                        const int32 InWidth,
+                        const int32 InHeight) :
+            TextureIndex(InTextureIndex),
+            Width(InWidth),
+            Height(InHeight),
+            PixelFormat(InPixelFormat)
+        {
+        }
+    };
+
+    struct FGlTFTexture
+    {
+        bool bIsValid = false;
+        TArray<FGlTFMipMapping> MipMappings;
+        bool bIsSRGB;
+        int32 TextureCoord;
+        // Samples
+    };
+
     virtual FString GetReferencerName() const override
     {
         return TEXT("FGLTFParser");
@@ -87,25 +116,6 @@ private:
         }
     };
 
-    struct FGlTFMipMapping
-    {
-        const int32 TextureIndex;
-        TArray<uint8> Pixels;
-        int32 Width;
-        int32 Height;
-        EPixelFormat PixelFormat;
-
-        FGlTFMipMapping(const int32 InTextureIndex,
-                        const EPixelFormat InPixelFormat,
-                        const int32 InWidth,
-                        const int32 InHeight) :
-            TextureIndex(InTextureIndex),
-            Width(InWidth),
-            Height(InHeight),
-            PixelFormat(InPixelFormat)
-        {
-        }
-    };
 
     enum EGlTFComponentType
     {
@@ -156,9 +166,9 @@ private:
     bool GetImageBytes(const int32 ImageIndex, TSharedPtr<FJsonObject>& JsonImageObject, TArray64<uint8>& Bytes);
 
     static bool LoadMipMappings(const int32 TextureIndex,
-                               const TArray64<uint8>& Bytes,
-                               bool IsSRGB,
-                               TArray<FGlTFMipMapping>& OutMipMappings);
+                                const TArray64<uint8>& Bytes,
+                                bool IsSRGB,
+                                TArray<FGlTFMipMapping>& OutMipMappings);
 
     static bool LoadImageMetadata(const TArray64<uint8>& Bytes,
                                   TArray64<uint8>& OutBytes,
@@ -184,7 +194,9 @@ private:
 
     void LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, int32 MaterialIndex);
 
-    void GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialObject);
+    FGlTFTexture GetGlTFTexture(const TSharedRef<FJsonObject>& JsonMaterialObject,
+                                const FString& FieldName,
+                                bool bIsSRGB);
 
     static bool IsTextureSizeAlignedToPixelFormat(int Width, int Height, EPixelFormat PixelFormat);
 

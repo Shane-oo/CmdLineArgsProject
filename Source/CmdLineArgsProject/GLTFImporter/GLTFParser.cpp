@@ -1034,7 +1034,7 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
         (*JsonPbrObject)->TryGetNumberField(TEXT("roughnessFactor"), MaterialProperties.Roughness);
         (*JsonPbrObject)->TryGetNumberField(TEXT("metallicFactor"), MaterialProperties.Metalness);
 
-        GetDiffuseTexture(JsonPbrObject->ToSharedRef());
+        MaterialProperties.DiffuseTexture = GetGlTFTexture(JsonPbrObject->ToSharedRef(), "baseColorTexture", true);
     }
 
     if (const TArray<TSharedPtr<FJsonValue>>* JsonEmissiveFactorArray;
@@ -1051,18 +1051,22 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
     }
 }
 
-void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialObject)
+FGLTFParser::FGlTFTexture FGLTFParser::GetGlTFTexture(const TSharedRef<FJsonObject>& JsonMaterialObject,
+                                                      const FString& FieldName,
+                                                      const bool bIsSRGB)
 {
+    FGlTFTexture GlTFTexture{};
+
     const TSharedPtr<FJsonObject>* JsonTextureObject;
-    if (!JsonMaterialObject->TryGetObjectField(TEXT("baseColorTexture"), JsonTextureObject))
+    if (!JsonMaterialObject->TryGetObjectField(FieldName, JsonTextureObject))
     {
-        return;
+        return GlTFTexture;
     }
 
     int64 TextureIndex;
     if (!(*JsonTextureObject)->TryGetNumberField(TEXT("index"), TextureIndex))
     {
-        return;
+        return GlTFTexture;
     }
 
     int32 TextureCoord = 0;
@@ -1071,13 +1075,13 @@ void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialO
     TSharedPtr<FJsonObject> JsonTexture = GetJsonObjectFromRootIndex("textures", TextureIndex);
     if (!JsonTexture)
     {
-        return;
+        return GlTFTexture;
     }
 
     int64 ImageIndex;
     if (!JsonTexture->TryGetNumberField(TEXT("source"), ImageIndex))
     {
-        return;
+        return GlTFTexture;
     }
 
     TSharedPtr<FJsonObject> JsonImageObject;
@@ -1085,7 +1089,7 @@ void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialO
 
     if (!GetImageBytes(ImageIndex, JsonImageObject, ImageData))
     {
-        return;
+        return GlTFTexture;
     }
 
     if (int64 SampleIndex; !JsonImageObject->TryGetNumberField(TEXT("sample"), SampleIndex))
@@ -1099,13 +1103,19 @@ void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialO
     TArray<FGlTFMipMapping> MipMappings;
     if (!LoadMipMappings(TextureIndex,
                          ImageData,
-                         true,
+                         bIsSRGB,
                          MipMappings))
     {
-        return;
+        return GlTFTexture;
     }
 
     // Build UTexture2D or pass in the MipMapping into GLTFMaterial probs the later
+    GlTFTexture.bIsValid = true;
+    GlTFTexture.MipMappings = MipMappings;
+    GlTFTexture.bIsSRGB = bIsSRGB;
+    GlTFTexture.TextureCoord = TextureCoord;
+
+    return GlTFTexture;
 }
 
 

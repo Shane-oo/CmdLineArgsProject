@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GLTFParser.h"
 #include "GLTFMaterial.generated.h"
 
 
@@ -21,7 +22,12 @@ struct FGlTFMaterialProperties
     float Metalness = 0.0f;
 
     FVector EmissiveColour = FVector(0.0f);
+
+    FGLTFParser::FGlTFTexture DiffuseTexture;
+    FGLTFParser::FGlTFTexture NormalTexture;
+    FGLTFParser::FGlTFTexture MetalnessRoughnessTexture;
 };
+
 
 /**
  * 
@@ -46,4 +52,7 @@ public:
 
 private:
     static UMaterialInterface* GetBaseMaterialInterface(const FGlTFMaterialProperties& GlTFMaterialProperties);
+
+    // todo down the track defs need a texture cache
+    UTexture2D* BuildTexture(FGLTFParser::FGlTFTexture GlTFTexture, UMaterialInterface* MaterialParent);
 };
