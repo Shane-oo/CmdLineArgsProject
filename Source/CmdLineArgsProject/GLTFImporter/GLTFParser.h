@@ -118,6 +118,10 @@ private:
                                        const FString& FieldName,
                                        const FString& DefaultValue);
 
+    bool GetJsonObjectBytes(const TSharedRef<FJsonObject>& JsonObject, TArray64<uint8>& Bytes);
+
+    bool ParseBase64Uri(const FString& Uri, TArray64<uint8>& Bytes);
+
     template <int32 Num, typename T>
     static bool GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value);
 
@@ -129,6 +133,8 @@ private:
     bool GetBufferView(const int32 BufferViewIndex, FBuffer& OutBuffer);
 
     bool GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer);
+
+    bool GetImageBytes(const int32 ImageIndex, TSharedPtr<FJsonObject>& JsonImageObject, TArray64<uint8>& Bytes);
 
     bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
 
@@ -146,5 +152,7 @@ private:
 
     void GetVertexColours(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector3f>& Colours);
 
-    void LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex);
+    void LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, int32 MaterialIndex);
+
+    void GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialObject);
 };

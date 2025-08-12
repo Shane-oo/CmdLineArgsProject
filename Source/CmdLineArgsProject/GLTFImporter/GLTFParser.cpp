@@ -96,6 +96,58 @@ FString FGLTFParser::GetJsonObjectString(const TSharedPtr<FJsonObject>& JsonObje
     return Value;
 }
 
+bool FGLTFParser::GetJsonObjectBytes(const TSharedRef<FJsonObject>& JsonObject, TArray64<uint8>& Bytes)
+{
+    if (FString Uri; JsonObject->TryGetStringField(TEXT("uri"), Uri))
+    {
+        if (Uri.StartsWith("data:"))
+        {
+            return ParseBase64Uri(Uri, Bytes);
+        }
+        else
+        {
+            // Load seperated image files in directory maybe todo
+            return false;
+        }
+    }
+
+    if (int64 BufferViewIndex; JsonObject->TryGetNumberField(TEXT("bufferView"), BufferViewIndex))
+    {
+        FBuffer Buffer;
+        if (!GetBufferView(BufferViewIndex, Buffer))
+        {
+            return false;
+        }
+        Bytes.Append(Buffer.Data, Buffer.Num);
+    }
+
+    return Bytes.Num() > 0;
+}
+
+bool FGLTFParser::ParseBase64Uri(const FString& Uri, TArray64<uint8>& Bytes)
+{
+    const FString Base64Signature = ";base64,";
+
+    int32 StringIndex = Uri.Find(Base64Signature, ESearchCase::IgnoreCase, ESearchDir::FromStart, 5);
+
+    if (StringIndex < 5)
+    {
+        return false;
+    }
+
+    StringIndex += Base64Signature.Len();
+
+    TArray<uint8> BytesBase64;
+
+    const bool bSuccess = FBase64::Decode(Uri.Mid(StringIndex), BytesBase64);
+    if (bSuccess)
+    {
+        Bytes.Append(BytesBase64);
+    }
+
+    return bSuccess;
+}
+
 template <int32 Num, typename T>
 bool FGLTFParser::GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value)
 {
@@ -211,8 +263,22 @@ bool FGLTFParser::GetBuffer(const int32 BufferIndex, FBuffer& OutBuffer)
         return true;
     }
 
-    // todo look at the JsonBuffers (non-glb)
+    // todo look at the JsonBuffers (non-glb) only supporting glb right now
     return false;
+}
+
+bool FGLTFParser::GetImageBytes(const int32 ImageIndex,
+                                TSharedPtr<FJsonObject>& JsonImageObject,
+                                TArray64<uint8>& Bytes)
+{
+    JsonImageObject = GetJsonObjectFromRootIndex("images", ImageIndex);
+    if (!JsonImageObject)
+    {
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::GetImageBytes::Error:: Unable to find image %d."), ImageIndex);
+        return false;
+    }
+
+    return GetJsonObjectBytes(JsonImageObject.ToSharedRef(), Bytes);
 }
 
 bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices)
@@ -769,7 +835,7 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
     return true;
 }
 
-void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 MaterialIndex)
+void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, const int32 MaterialIndex)
 {
     FGlTFMaterialProperties MaterialProperties{};
 
@@ -807,9 +873,10 @@ void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 Mater
             GetJsonVector<4>(JsonBaseColourFactorArray, MaterialProperties.Colour);
         }
 
-
         (*JsonPbrObject)->TryGetNumberField(TEXT("roughnessFactor"), MaterialProperties.Roughness);
         (*JsonPbrObject)->TryGetNumberField(TEXT("metallicFactor"), MaterialProperties.Metalness);
+
+        GetDiffuseTexture(JsonPbrObject->ToSharedRef());
     }
 
     if (const TArray<TSharedPtr<FJsonValue>>* JsonEmissiveFactorArray;
@@ -818,10 +885,57 @@ void FGLTFParser::LoadMaterial(TSharedPtr<FJsonObject> JsonMaterial, int32 Mater
         GetJsonVector<3>(JsonEmissiveFactorArray, MaterialProperties.EmissiveColour);
     }
 
+
     if (const auto GlTFMaterial = NewObject<UGLTFMaterial>(GetTransientPackage());
         GlTFMaterial->CreateMaterial(MaterialProperties))
     {
         MaterialIndexToMaterialMap.Add(MaterialIndex, GlTFMaterial);
+    }
+}
+
+void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialObject)
+{
+    const TSharedPtr<FJsonObject>* JsonTextureObject;
+    if (!JsonMaterialObject->TryGetObjectField(TEXT("baseColorTexture"), JsonTextureObject))
+    {
+        return;
+    }
+
+    int64 TextureIndex;
+    if (!(*JsonTextureObject)->TryGetNumberField(TEXT("index"), TextureIndex))
+    {
+        return;
+    }
+
+    int32 TextureCoord = 0;
+    (*JsonTextureObject)->TryGetNumberField(TEXT("texCoord"), TextureCoord);
+
+    TSharedPtr<FJsonObject> JsonTexture = GetJsonObjectFromRootIndex("textures", TextureIndex);
+    if (!JsonTexture)
+    {
+        return;
+    }
+
+    int64 ImageIndex;
+    if (!JsonTexture->TryGetNumberField(TEXT("source"), ImageIndex))
+    {
+        return;
+    }
+
+    TSharedPtr<FJsonObject> JsonImageObject;
+    TArray64<uint8> ImageData;
+
+    if (!GetImageBytes(ImageIndex, JsonImageObject, ImageData))
+    {
+        return;
+    }
+
+    if (int64 SampleIndex; !JsonImageObject->TryGetNumberField(TEXT("sample"), SampleIndex))
+    {
+        if (const TSharedPtr<FJsonObject> JsonSampler = GetJsonObjectFromRootIndex("samplers", SampleIndex))
+        {
+            // todo should I bother with Samples?
+        }
     }
 }
 
