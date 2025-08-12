@@ -87,6 +87,25 @@ private:
         }
     };
 
+    struct FGlTFMipMapping
+    {
+        const int32 TextureIndex;
+        TArray<uint8> Pixels;
+        int32 Width;
+        int32 Height;
+        EPixelFormat PixelFormat;
+
+        FGlTFMipMapping(const int32 InTextureIndex,
+                        const EPixelFormat InPixelFormat,
+                        const int32 InWidth,
+                        const int32 InHeight) :
+            TextureIndex(InTextureIndex),
+            Width(InWidth),
+            Height(InHeight),
+            PixelFormat(InPixelFormat)
+        {
+        }
+    };
 
     enum EGlTFComponentType
     {
@@ -136,6 +155,17 @@ private:
 
     bool GetImageBytes(const int32 ImageIndex, TSharedPtr<FJsonObject>& JsonImageObject, TArray64<uint8>& Bytes);
 
+    static bool LoadMipMappings(const int32 TextureIndex,
+                               const TArray64<uint8>& Bytes,
+                               bool IsSRGB,
+                               TArray<FGlTFMipMapping>& OutMipMappings);
+
+    static bool LoadImageMetadata(const TArray64<uint8>& Bytes,
+                                  TArray64<uint8>& OutBytes,
+                                  int32& OutWidth,
+                                  int32& OutHeight,
+                                  EPixelFormat& OutPixelFormat);
+
     bool LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex);
 
     bool GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices);
@@ -155,4 +185,8 @@ private:
     void LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, int32 MaterialIndex);
 
     void GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialObject);
+
+    static bool IsTextureSizeAlignedToPixelFormat(int Width, int Height, EPixelFormat PixelFormat);
+
+    static bool CanGenerateMipMaps(int Width, int Height, EPixelFormat PixelFormat);
 };

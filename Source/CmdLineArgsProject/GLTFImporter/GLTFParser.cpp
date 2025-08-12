@@ -7,10 +7,26 @@
 #include "GLTFAsset.h"
 #include "GLTFMaterial.h"
 #include "GLTFStaticMeshComponent.h"
+#include "IImageWrapperModule.h"
+#include "ImageUtils.h"
 
 // #region Private Methods
 
 class UGLTFStaticMeshComponent;
+
+bool FGLTFParser::IsTextureSizeAlignedToPixelFormat(const int Width, const int Height, const EPixelFormat PixelFormat)
+{
+    return Width % GPixelFormats[PixelFormat].BlockSizeX == 0
+        && Height % GPixelFormats[PixelFormat].BlockSizeY == 0;
+}
+
+bool FGLTFParser::CanGenerateMipMaps(const int Width, const int Height, const EPixelFormat PixelFormat)
+{
+    return GPixelFormats[PixelFormat].BlockSizeX == 1
+        && GPixelFormats[PixelFormat].BlockSizeY == 1
+        && FMath::IsPowerOfTwo(Width)
+        && FMath::IsPowerOfTwo(Height);
+}
 
 void FGLTFParser::CheckExtensionsRequired() const
 {
@@ -118,7 +134,7 @@ bool FGLTFParser::GetJsonObjectBytes(const TSharedRef<FJsonObject>& JsonObject, 
         {
             return false;
         }
-        Bytes.Append(Buffer.Data, Buffer.Num);
+        Bytes.Append(Buffer.Data + Buffer.ByteOffset, Buffer.Num);
     }
 
     return Bytes.Num() > 0;
@@ -279,6 +295,145 @@ bool FGLTFParser::GetImageBytes(const int32 ImageIndex,
     }
 
     return GetJsonObjectBytes(JsonImageObject.ToSharedRef(), Bytes);
+}
+
+bool FGLTFParser::LoadMipMappings(const int32 TextureIndex,
+                                  const TArray64<uint8>& Bytes,
+                                  const bool IsSRGB,
+                                  TArray<FGlTFMipMapping>& OutMipMappings)
+{
+    TArray64<uint8> UncompressedBytes;
+    int32 Width = 0;
+    int32 Height = 0;
+    EPixelFormat PixelFormat;
+
+    if (!LoadImageMetadata(Bytes, UncompressedBytes, Width, Height, PixelFormat))
+    {
+        return false;
+    }
+
+    if (Width > 0 && Height > 0 && IsTextureSizeAlignedToPixelFormat(Width, Height, PixelFormat))
+    {
+        int32 NumOfMips = 1;
+
+        TArray64<FColor> UncompressedColours;
+
+        // Generate Mip Maps
+        if (CanGenerateMipMaps(Width, Height, PixelFormat))
+        {
+            NumOfMips = FMath::FloorLog2(FMath::Max(Width, Height)) + 1;
+
+            for (int32 MipY = 0; MipY < Height; MipY++)
+            {
+                for (int32 MipX = 0; MipX < Width; MipX++)
+                {
+                    const int64 MipColourIndex = ((MipY * Width) + MipX) * 4;
+                    const auto MipColorB = UncompressedBytes[MipColourIndex];
+                    const auto MipColorG = UncompressedBytes[MipColourIndex + 1];
+                    const auto MipColorR = UncompressedBytes[MipColourIndex + 2];
+                    const auto MipColorA = UncompressedBytes[MipColourIndex + 3];
+                    UncompressedColours.Add(FColor(MipColorR, MipColorG, MipColorB, MipColorA));
+                }
+            }
+        }
+
+        int32 MipWidth = Width;
+        int32 MipHeight = Height;
+
+        for (int32 MipIndex = 0; MipIndex < NumOfMips; MipIndex++)
+        {
+            FGlTFMipMapping MipMapping(TextureIndex, PixelFormat, MipWidth, MipHeight);
+
+            // Resize Image to a smaller Mip Map
+            if (MipIndex > 0)
+            {
+                TArray64<FColor> ResizedMipMapData;
+                ResizedMipMapData.AddUninitialized(MipWidth * MipHeight);
+
+                FImageUtils::ImageResize(Width,
+                                         Height,
+                                         UncompressedColours,
+                                         MipWidth,
+                                         MipHeight,
+                                         ResizedMipMapData,
+                                         IsSRGB,
+                                         false);
+
+                for (auto Color : ResizedMipMapData)
+                {
+                    MipMapping.Pixels.Add(Color.B);
+                    MipMapping.Pixels.Add(Color.G);
+                    MipMapping.Pixels.Add(Color.R);
+                    MipMapping.Pixels.Add(Color.A);
+                }
+            }
+            else
+            {
+                MipMapping.Pixels = UncompressedBytes;
+            }
+
+            OutMipMappings.Add(MipMapping);
+
+            MipWidth = FMath::Max(MipWidth / 2, 1);
+            MipHeight = FMath::Max(MipHeight / 2, 1);
+        }
+    }
+
+    return true;
+}
+
+bool FGLTFParser::LoadImageMetadata(const TArray64<uint8>& Bytes,
+                                    TArray64<uint8>& OutBytes,
+                                    int32& OutWidth,
+                                    int32& OutHeight,
+                                    EPixelFormat& OutPixelFormat)
+{
+    OutPixelFormat = PF_B8G8R8A8;
+
+    IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(
+        TEXT("ImageWrapper"));
+
+    const EImageFormat ImageFormat = ImageWrapperModule.DetectImageFormat(Bytes.GetData(), Bytes.Num());
+
+    if (ImageFormat == EImageFormat::Invalid)
+    {
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::LoadImage::Error:: Invalid Image Format."));
+        return false;
+    }
+
+    ERGBFormat RGBFormat = ERGBFormat::BGRA;
+    int32 BitDepth = 8;
+
+    if (ImageFormat == EImageFormat::EXR)
+    {
+        RGBFormat = ERGBFormat::RGBAF;
+        BitDepth = 16;
+        OutPixelFormat = PF_FloatRGBA;
+    }
+
+    const TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(ImageFormat);
+    if (!ImageWrapper.IsValid())
+    {
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::LoadImage::Error:: Unable to Create Image Wrapper."));
+        return false;
+    }
+
+    if (!ImageWrapper->SetCompressed(Bytes.GetData(), Bytes.Num()))
+    {
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::LoadImage::Error:: Unable to Parse Image Data."));
+        return false;
+    }
+
+    if (!ImageWrapper->GetRaw(RGBFormat, BitDepth, OutBytes))
+    {
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::LoadImage::Error:: Unable to Get Raw Image Data."));
+        return false;
+    }
+
+    OutWidth = ImageWrapper->GetWidth();
+    OutHeight = ImageWrapper->GetHeight();
+
+    return true;
 }
 
 bool FGLTFParser::GetVertices(const TSharedPtr<FJsonObject>* JsonAttributesObject, TArray<FVector>& Vertices)
@@ -807,7 +962,10 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
             if (int64 MaterialIndexIndex;
                 JsonPrimitiveObject->TryGetNumberField(TEXT("material"), MaterialIndexIndex))
             {
-                Material = MaterialIndexToMaterialMap[MaterialIndexIndex];
+                if (MaterialIndexToMaterialMap.Contains(MaterialIndexIndex))
+                {
+                    Material = MaterialIndexToMaterialMap[MaterialIndexIndex];
+                }
             }
 
             UGLTFStaticMeshComponent* GlTFStaticMesh = NewObject<UGLTFStaticMeshComponent>();
@@ -937,7 +1095,19 @@ void FGLTFParser::GetDiffuseTexture(const TSharedRef<FJsonObject>& JsonMaterialO
             // todo should I bother with Samples?
         }
     }
+
+    TArray<FGlTFMipMapping> MipMappings;
+    if (!LoadMipMappings(TextureIndex,
+                         ImageData,
+                         true,
+                         MipMappings))
+    {
+        return;
+    }
+
+    // Build UTexture2D or pass in the MipMapping into GLTFMaterial probs the later
 }
+
 
 // #endregion
 
