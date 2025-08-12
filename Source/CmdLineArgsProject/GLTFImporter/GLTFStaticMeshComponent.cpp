@@ -56,9 +56,9 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
     const FPolygonGroupID PolygonGroup = MeshDescriptionBuilder.AppendPolygonGroup();
     for (int32 i = 0; i < Indices.Num(); i += 3)
     {
-        const FVertexInstanceID V0 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 0]]);
-        const FVertexInstanceID V1 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 1]]);
-        const FVertexInstanceID V2 = MeshDescriptionBuilder.AppendInstance(VertexIds[Indices[i + 2]]);
+        const FVertexInstanceID V0 = VertexInstanceIds[Indices[i + 0]];
+        const FVertexInstanceID V1 = VertexInstanceIds[Indices[i + 1]];
+        const FVertexInstanceID V2 = VertexInstanceIds[Indices[i + 2]];
 
         //Unreal uses counter-clockwise (CCW) winding order
         MeshDescriptionBuilder.AppendTriangle(V0, V2, V1, PolygonGroup);
