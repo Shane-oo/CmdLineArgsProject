@@ -109,7 +109,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     DynamicMaterial->SetScalarParameterValue("glTFRoughness", GlTFMaterialProperties.Roughness);
     DynamicMaterial->SetScalarParameterValue("glTFMetalness", GlTFMaterialProperties.Metalness);
 
-    DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
+    // leave out for now
+    //DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
 
     DynamicMaterial->SetScalarParameterValue("gltfAlphaCutOff", GlTFMaterialProperties.AlphaCutOff);
 
@@ -127,6 +128,15 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFNormalTexture", NormalTexture);
         DynamicMaterial->SetScalarParameterValue("glTFNormalTextureCoord",
                                                  GlTFMaterialProperties.NormalTexture.TextureCoord);
+    }
+
+    if (const auto MetalnessRoughnessTexture = BuildTexture(GlTFMaterialProperties.MetalnessRoughnessTexture,
+                                                            DynamicMaterial))
+    {
+        DynamicMaterial->SetScalarParameterValue("useGlTFMetalnessRoughnessTexture", 1.0f);
+        DynamicMaterial->SetTextureParameterValue("glTFMetalnessRoughnessTexture", MetalnessRoughnessTexture);
+        DynamicMaterial->SetScalarParameterValue("glTFMetalnessRoughnessTextureCoord",
+                                                 GlTFMaterialProperties.MetalnessRoughnessTexture.TextureCoord);
     }
 
     // Compile the material

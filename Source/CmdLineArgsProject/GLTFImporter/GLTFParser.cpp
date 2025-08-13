@@ -1036,6 +1036,10 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
         (*JsonPbrObject)->TryGetNumberField(TEXT("metallicFactor"), MaterialProperties.Metalness);
 
         MaterialProperties.DiffuseTexture = GetGlTFTexture(JsonPbrObject->ToSharedRef(), "baseColorTexture", true);
+
+        MaterialProperties.MetalnessRoughnessTexture = GetGlTFTexture(JsonPbrObject->ToSharedRef(),
+                                                                      "metallicRoughnessTexture",
+                                                                      false);
     }
 
     if (const TArray<TSharedPtr<FJsonValue>>* JsonEmissiveFactorArray;
