@@ -109,8 +109,7 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     DynamicMaterial->SetScalarParameterValue("glTFRoughness", GlTFMaterialProperties.Roughness);
     DynamicMaterial->SetScalarParameterValue("glTFMetalness", GlTFMaterialProperties.Metalness);
 
-    // leave out for now
-    //DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
+    DynamicMaterial->SetVectorParameterValue("gltfEmissiveColor", GlTFMaterialProperties.EmissiveColour);
 
     DynamicMaterial->SetScalarParameterValue("gltfAlphaCutOff", GlTFMaterialProperties.AlphaCutOff);
 
@@ -137,6 +136,24 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFMetalnessRoughnessTexture", MetalnessRoughnessTexture);
         DynamicMaterial->SetScalarParameterValue("glTFMetalnessRoughnessTextureCoord",
                                                  GlTFMaterialProperties.MetalnessRoughnessTexture.TextureCoord);
+    }
+
+    if (const auto OcclusionTexture = BuildTexture(GlTFMaterialProperties.OcclusionTexture,
+                                                   DynamicMaterial))
+    {
+        DynamicMaterial->SetScalarParameterValue("useGlTFOcclusionTexture", 1.0f);
+        DynamicMaterial->SetTextureParameterValue("glTFOcclusionTexture", OcclusionTexture);
+        DynamicMaterial->SetScalarParameterValue("glTFOcclusionTextureCoord",
+                                                 GlTFMaterialProperties.OcclusionTexture.TextureCoord);
+    }
+
+    if (const auto EmissiveTexture = BuildTexture(GlTFMaterialProperties.EmissiveTexture,
+                                                  DynamicMaterial))
+    {
+        DynamicMaterial->SetScalarParameterValue("useGlTFEmissiveTexture", 1.0f);
+        DynamicMaterial->SetTextureParameterValue("glTFEmissiveTexture", EmissiveTexture);
+        DynamicMaterial->SetScalarParameterValue("glTFEmissiveTextureCoord",
+                                                 GlTFMaterialProperties.EmissiveTexture.TextureCoord);
     }
 
     // Compile the material

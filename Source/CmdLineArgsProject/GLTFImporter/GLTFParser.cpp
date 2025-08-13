@@ -1050,6 +1050,9 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
 
     MaterialProperties.NormalTexture = GetGlTFTexture(JsonMaterial, "normalTexture", false);
 
+    MaterialProperties.OcclusionTexture = GetGlTFTexture(JsonMaterial, "occlusionTexture", false);
+
+    MaterialProperties.EmissiveTexture = GetGlTFTexture(JsonMaterial, "emissiveTexture", true);
 
     if (const auto GlTFMaterial = NewObject<UGLTFMaterial>(GetTransientPackage());
         GlTFMaterial->CreateMaterial(MaterialProperties))

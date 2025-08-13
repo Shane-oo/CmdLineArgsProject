@@ -26,6 +26,8 @@ struct FGlTFMaterialProperties
     FGLTFParser::FGlTFTexture DiffuseTexture;
     FGLTFParser::FGlTFTexture NormalTexture;
     FGLTFParser::FGlTFTexture MetalnessRoughnessTexture;
+    FGLTFParser::FGlTFTexture OcclusionTexture;
+    FGLTFParser::FGlTFTexture EmissiveTexture;
 };
 
 
