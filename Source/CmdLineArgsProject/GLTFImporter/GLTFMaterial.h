@@ -23,6 +23,8 @@ struct FGlTFMaterialProperties
 
     FVector EmissiveColour = FVector(0.0f); // Black
 
+    FVector4 NormalScale = FVector4(1.0f, 1.0f, 1.0f, 1.0f); // z and w unsued
+
     FGLTFParser::FGlTFTexture DiffuseTexture;
     FGLTFParser::FGlTFTexture NormalTexture;
     FGLTFParser::FGlTFTexture MetalnessRoughnessTexture;

@@ -127,6 +127,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFNormalTexture", NormalTexture);
         DynamicMaterial->SetScalarParameterValue("glTFNormalTextureCoord",
                                                  GlTFMaterialProperties.NormalTexture.TextureCoord);
+
+        DynamicMaterial->SetVectorParameterValue("glTFNormalScale", GlTFMaterialProperties.NormalScale);
     }
 
     if (const auto MetalnessRoughnessTexture = BuildTexture(GlTFMaterialProperties.MetalnessRoughnessTexture,

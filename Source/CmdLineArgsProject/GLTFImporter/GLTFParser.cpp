@@ -1049,6 +1049,16 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
     }
 
     MaterialProperties.NormalTexture = GetGlTFTexture(JsonMaterial, "normalTexture", false);
+    if (MaterialProperties.NormalTexture.bIsValid)
+    {
+        auto JsonNormalTextureObject = JsonMaterial->GetObjectField(TEXT("normalTexture"));
+        if (float NormalScale; JsonNormalTextureObject->TryGetNumberField(TEXT("scale"), NormalScale))
+        {
+            // Scales both X and Y
+            MaterialProperties.NormalScale.X = NormalScale;
+            MaterialProperties.NormalScale.Y = NormalScale;
+        }
+    }
 
     MaterialProperties.OcclusionTexture = GetGlTFTexture(JsonMaterial, "occlusionTexture", false);
 
