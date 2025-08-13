@@ -194,7 +194,7 @@ private:
 
     void LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, int32 MaterialIndex);
 
-    FGlTFTexture GetGlTFTexture(const TSharedRef<FJsonObject>& JsonMaterialObject,
+    FGlTFTexture GetGlTFTexture(const TSharedPtr<FJsonObject>& JsonMaterialObject,
                                 const FString& FieldName,
                                 bool bIsSRGB);
 

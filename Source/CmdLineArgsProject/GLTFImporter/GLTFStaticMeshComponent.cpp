@@ -10,10 +10,11 @@
 // #region Private Methods
 
 void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Name,
-                                                              TArray<FVector> Vertices,
-                                                              TArray<int32> Indices,
-                                                              TArray<FVector3f> Normals,
-                                                              TArray<FVector2f> TextureCoords0)
+                                                              const TArray<FVector>& Vertices,
+                                                              const TArray<int32>& Indices,
+                                                              const TArray<FVector3f>& Normals,
+                                                              const TArray<FVector2f>& TextureCoords0,
+                                                              const TArray<FVector2f>& TextureCoords1)
 {
     ComputedStaticMesh = NewObject<UStaticMesh>(this, *FString::Printf(TEXT("SM_%s"), *Name));
 
@@ -24,7 +25,7 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
     FMeshDescriptionBuilder MeshDescriptionBuilder;
     MeshDescriptionBuilder.SetMeshDescription(&MeshDescription);
     MeshDescriptionBuilder.EnablePolyGroups();
-    MeshDescriptionBuilder.SetNumUVLayers(1); // for now just 1 
+    MeshDescriptionBuilder.SetNumUVLayers(2);
 
     // Create Vertices
     TArray<FVertexID> VertexIds;
@@ -35,6 +36,7 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
 
     const auto VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
     const auto VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+    VertexInstanceUVs.SetNumChannels(2);
 
     for (int32 i = 0; i < Vertices.Num(); ++i)
     {
@@ -52,6 +54,11 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
         if (!TextureCoords0.IsEmpty())
         {
             VertexInstanceUVs.Set(InstanceID, 0, TextureCoords0[i]);
+        }
+
+        if (!TextureCoords1.IsEmpty())
+        {
+            VertexInstanceUVs.Set(InstanceID, 1, TextureCoords1[i]);
         }
     }
 
@@ -90,13 +97,14 @@ bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
                                           const TArray<int32>& Indices,
                                           const TArray<FVector3f>& Normals,
                                           const TArray<FVector2f>& TextureCoords0,
+                                          const TArray<FVector2f>& TextureCoords1,
                                           const FTransform& Transform,
                                           const UGLTFMaterial* GlTFMaterial)
 {
     this->Name = Name;
     SetRelativeTransform(Transform);
 
-    CreateStaticMeshFromPrimitives(Name, Vertices, Indices, Normals, TextureCoords0);
+    CreateStaticMeshFromPrimitives(Name, Vertices, Indices, Normals, TextureCoords0, TextureCoords1);
 
     if (GlTFMaterial)
     {

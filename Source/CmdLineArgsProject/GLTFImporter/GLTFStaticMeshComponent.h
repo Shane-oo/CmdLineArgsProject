@@ -24,6 +24,7 @@ public:
                     const TArray<int32>& Indices,
                     const TArray<FVector3f>& Normals,
                     const TArray<FVector2f>& TextureCoords0,
+                    const TArray<FVector2f>& TextureCoords1,
                     const FTransform& Transform,
                     const UGLTFMaterial* GlTFMaterial = nullptr);
 
@@ -38,8 +39,9 @@ private:
 
 private:
     void CreateStaticMeshFromPrimitives(const FString& Name,
-                                        TArray<FVector> Vertices,
-                                        TArray<int32> Indices,
-                                        TArray<FVector3f> Normals,
-                                        TArray<FVector2f> TextureCoords0);
+                                        const TArray<FVector>& Vertices,
+                                        const TArray<int32>& Indices,
+                                        const TArray<FVector3f>& Normals,
+                                        const TArray<FVector2f>& TextureCoords0,
+                                        const TArray<FVector2f>& TextureCoords1);
 };

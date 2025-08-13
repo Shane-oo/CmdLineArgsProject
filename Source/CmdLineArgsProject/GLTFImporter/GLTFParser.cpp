@@ -978,6 +978,7 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
                                             Indices,
                                             Normals,
                                             TextureCoords0,
+                                            TextureCoords1,
                                             Transform,
                                             Material))
             {
@@ -1043,6 +1044,8 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
         GetJsonVector<3>(JsonEmissiveFactorArray, MaterialProperties.EmissiveColour);
     }
 
+    MaterialProperties.NormalTexture = GetGlTFTexture(JsonMaterial, "normalTexture", false);
+
 
     if (const auto GlTFMaterial = NewObject<UGLTFMaterial>(GetTransientPackage());
         GlTFMaterial->CreateMaterial(MaterialProperties))
@@ -1051,7 +1054,7 @@ void FGLTFParser::LoadMaterial(const TSharedPtr<FJsonObject>& JsonMaterial, cons
     }
 }
 
-FGLTFParser::FGlTFTexture FGLTFParser::GetGlTFTexture(const TSharedRef<FJsonObject>& JsonMaterialObject,
+FGLTFParser::FGlTFTexture FGLTFParser::GetGlTFTexture(const TSharedPtr<FJsonObject>& JsonMaterialObject,
                                                       const FString& FieldName,
                                                       const bool bIsSRGB)
 {
@@ -1072,7 +1075,7 @@ FGLTFParser::FGlTFTexture FGLTFParser::GetGlTFTexture(const TSharedRef<FJsonObje
     int32 TextureCoord = 0;
     (*JsonTextureObject)->TryGetNumberField(TEXT("texCoord"), TextureCoord);
 
-    TSharedPtr<FJsonObject> JsonTexture = GetJsonObjectFromRootIndex("textures", TextureIndex);
+    const TSharedPtr<FJsonObject> JsonTexture = GetJsonObjectFromRootIndex("textures", TextureIndex);
     if (!JsonTexture)
     {
         return GlTFTexture;
@@ -1109,7 +1112,6 @@ FGLTFParser::FGlTFTexture FGLTFParser::GetGlTFTexture(const TSharedRef<FJsonObje
         return GlTFTexture;
     }
 
-    // Build UTexture2D or pass in the MipMapping into GLTFMaterial probs the later
     GlTFTexture.bIsValid = true;
     GlTFTexture.MipMappings = MipMappings;
     GlTFTexture.bIsSRGB = bIsSRGB;
@@ -1284,7 +1286,6 @@ TSharedPtr<FGLTFParser> FGLTFParser::CreateFromString(const FString& GlTFJsonDat
 
 bool FGLTFParser::LoadScene()
 {
-    // Load Materials...
     const TArray<TSharedPtr<FJsonValue>>* Materials;
     Root->TryGetArrayField(TEXT("materials"), Materials);
     for (int32 MaterialIndex = 0; MaterialIndex < Materials->Num(); MaterialIndex++)

@@ -21,7 +21,7 @@ struct FGlTFMaterialProperties
     float Roughness = 1.0f;
     float Metalness = 0.0f;
 
-    FVector EmissiveColour = FVector(0.0f);
+    FVector EmissiveColour = FVector(0.0f); // Black
 
     FGLTFParser::FGlTFTexture DiffuseTexture;
     FGLTFParser::FGlTFTexture NormalTexture;

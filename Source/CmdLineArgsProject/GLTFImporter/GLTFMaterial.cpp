@@ -95,9 +95,7 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     UMaterialInterface* BaseGlTFMaterial = GetBaseMaterialInterface(GlTFMaterialProperties);
     if (!BaseGlTFMaterial)
     {
-        UE_LOG(LogTemp,
-               Error,
-               TEXT("FGLTFParser::AddMaterialToMaterialsMap::Error:: File: BaseGlTFMaterial Not Found!"));
+        UE_LOG(LogTemp, Error, TEXT("FGLTFParser::CreateMaterial::Error::BaseGlTFMaterial Not Found!"));
         return false;
     }
 
@@ -119,6 +117,16 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
     {
         DynamicMaterial->SetScalarParameterValue("useGlTFDiffuseTexture", 1.0f);
         DynamicMaterial->SetTextureParameterValue("glTFDiffuseTexture", DiffuseTexture);
+        DynamicMaterial->SetScalarParameterValue("glTFDiffuseTextureCoord",
+                                                 GlTFMaterialProperties.DiffuseTexture.TextureCoord);
+    }
+
+    if (const auto NormalTexture = BuildTexture(GlTFMaterialProperties.NormalTexture, DynamicMaterial))
+    {
+        DynamicMaterial->SetScalarParameterValue("useGlTFNormalTexture", 1.0f);
+        DynamicMaterial->SetTextureParameterValue("glTFNormalTexture", NormalTexture);
+        DynamicMaterial->SetScalarParameterValue("glTFNormalTextureCoord",
+                                                 GlTFMaterialProperties.NormalTexture.TextureCoord);
     }
 
     // Compile the material

@@ -41,22 +41,25 @@ void UCustomGameInstance::OnStart()
         FString("/home/shane/Downloads/c5820f7eccca45a7a659356d42de3ab6.glb")
     );*/
 
-    /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+    /*
+    auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/VulkanSampleScene.glb")
     );*/
 
+    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/VulkanSampleSceneWithTextures.glb")
     );
+    */
 
     /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/CesiumMan.glb")
     );*/
 
-    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/DamagedHelmet.glb")
-    );*/
+    );
+
 
     if (glTfAsset)
     {
