@@ -12,30 +12,33 @@ UMaterialInterface* UGLTFMaterial::GetBaseMaterialInterface(const FGlTFMaterialP
     if (GlTFMaterialProperties.bTranslucent && GlTFMaterialProperties.bDoubleSided)
     {
         BaseGlTFMaterial = LoadObject<UMaterialInterface>(
-            nullptr, TEXT("/Game/M_GlTF_Translucent_DoubleSided_BaseMaterial")
+            nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_Translucent_DoubleSided_BaseMaterial")
         );
     }
     else if (GlTFMaterialProperties.bMasked && GlTFMaterialProperties.bDoubleSided)
     {
         BaseGlTFMaterial = LoadObject<UMaterialInterface>(
-            nullptr, TEXT("/Game/M_GlTF_Masked_DoubleSided_BaseMaterial")
+            nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_Masked_DoubleSided_BaseMaterial")
         );
     }
     else if (GlTFMaterialProperties.bTranslucent)
     {
-        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_Translucent_BaseMaterial"));
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(
+            nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_Translucent_BaseMaterial"));
     }
     else if (GlTFMaterialProperties.bMasked)
     {
-        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_Masked_BaseMaterial"));
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(
+            nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_Masked_BaseMaterial"));
     }
     else if (GlTFMaterialProperties.bDoubleSided)
     {
-        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_DoubleSided_BaseMaterial"));
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(
+            nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_DoubleSided_BaseMaterial"));
     }
     else
     {
-        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/M_GlTF_BaseMaterial"));
+        BaseGlTFMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/GlTFMaterials/M_GlTF_BaseMaterial"));
     }
 
     return BaseGlTFMaterial;
@@ -99,6 +102,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         return false;
     }
 
+    UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Found BaseGlTFMaterial"));
+
     DynamicMaterial = UMaterialInstanceDynamic::Create(
         BaseGlTFMaterial,
         GetTransientPackage(),
@@ -119,6 +124,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFDiffuseTexture", DiffuseTexture);
         DynamicMaterial->SetScalarParameterValue("glTFDiffuseTextureCoord",
                                                  GlTFMaterialProperties.DiffuseTexture.TextureCoord);
+
+        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Using Diffuse Texture"));
     }
 
     if (const auto NormalTexture = BuildTexture(GlTFMaterialProperties.NormalTexture, DynamicMaterial))
@@ -129,6 +136,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
                                                  GlTFMaterialProperties.NormalTexture.TextureCoord);
 
         DynamicMaterial->SetVectorParameterValue("glTFNormalScale", GlTFMaterialProperties.NormalScale);
+
+        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Using normal Texture"));
     }
 
     if (const auto MetalnessRoughnessTexture = BuildTexture(GlTFMaterialProperties.MetalnessRoughnessTexture,
@@ -138,6 +147,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFMetalnessRoughnessTexture", MetalnessRoughnessTexture);
         DynamicMaterial->SetScalarParameterValue("glTFMetalnessRoughnessTextureCoord",
                                                  GlTFMaterialProperties.MetalnessRoughnessTexture.TextureCoord);
+
+        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Using metalnessRoughness Texture"));
     }
 
     if (const auto OcclusionTexture = BuildTexture(GlTFMaterialProperties.OcclusionTexture,
@@ -147,6 +158,8 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFOcclusionTexture", OcclusionTexture);
         DynamicMaterial->SetScalarParameterValue("glTFOcclusionTextureCoord",
                                                  GlTFMaterialProperties.OcclusionTexture.TextureCoord);
+
+        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Using Occlusion Texture"));
     }
 
     if (const auto EmissiveTexture = BuildTexture(GlTFMaterialProperties.EmissiveTexture,
@@ -156,10 +169,10 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         DynamicMaterial->SetTextureParameterValue("glTFEmissiveTexture", EmissiveTexture);
         DynamicMaterial->SetScalarParameterValue("glTFEmissiveTextureCoord",
                                                  GlTFMaterialProperties.EmissiveTexture.TextureCoord);
+
+        UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Using Emissive Texture"));
     }
 
-    // Compile the material
-    DynamicMaterial->PostEditChange();
 
     return true;
 }

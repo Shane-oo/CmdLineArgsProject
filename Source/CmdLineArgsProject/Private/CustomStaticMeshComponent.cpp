@@ -17,6 +17,7 @@ UCustomStaticMeshComponent::UCustomStaticMeshComponent()
 
 void UCustomStaticMeshComponent::InitMesh(const bool UseRedMaterial)
 {
+    /*
     const auto MaterialLocation = UseRedMaterial
                                       ? TEXT("/Game/RedMaterial.RedMaterial")
                                       : TEXT("/Game/BlueMaterial.BlueMaterial");
@@ -33,6 +34,7 @@ void UCustomStaticMeshComponent::InitMesh(const bool UseRedMaterial)
     {
         //SetStaticMesh(CubeMesh);
     }
+    */
 
     float ScaleX;
     float ScaleY;

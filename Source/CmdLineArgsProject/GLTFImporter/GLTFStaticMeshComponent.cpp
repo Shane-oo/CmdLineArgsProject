@@ -19,6 +19,7 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
     ComputedStaticMesh = NewObject<UStaticMesh>(this, *FString::Printf(TEXT("SM_%s"), *Name));
 
     FMeshDescription MeshDescription;
+
     FStaticMeshAttributes Attributes(MeshDescription);
     Attributes.Register();
 
@@ -74,7 +75,25 @@ void UGLTFStaticMeshComponent::CreateStaticMeshFromPrimitives(const FString& Nam
         MeshDescriptionBuilder.AppendTriangle(V0, V2, V1, PolygonGroup);
     }
 
-    ComputedStaticMesh->BuildFromMeshDescriptions({&MeshDescription});
+    UStaticMesh::FBuildMeshDescriptionsParams DescriptionsParams;
+    DescriptionsParams.bFastBuild = true;
+    DescriptionsParams.bAllowCpuAccess = true;
+
+    ComputedStaticMesh->BuildFromMeshDescriptions({&MeshDescription}, DescriptionsParams);
+
+    ComputedStaticMesh->bAllowCPUAccess = true;
+
+    for (FStaticMeshLODResources& LOD : ComputedStaticMesh->GetRenderData()->LODResources)
+    {
+        for (FStaticMeshSection& Section : LOD.Sections)
+        {
+            // Force to first material slot
+            Section.MaterialIndex = 0;
+        }
+    }
+
+    // Rebuild GPU data
+    ComputedStaticMesh->InitResources();
 
     SetStaticMesh(ComputedStaticMesh);
 }
@@ -102,6 +121,7 @@ bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
                                           const UGLTFMaterial* GlTFMaterial)
 {
     this->Name = Name;
+
     SetRelativeTransform(Transform);
 
     CreateStaticMeshFromPrimitives(Name, Vertices, Indices, Normals, TextureCoords0, TextureCoords1);
@@ -110,7 +130,11 @@ bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
     {
         ComputedMaterial = GlTFMaterial->GetMaterial();
         SetMaterial(0, ComputedMaterial);
+
+        UE_LOG(LogTemp, Display, TEXT("UGLTFStaticMeshComponent::CreateMesh::Display:: Set the Material to %s"),
+               *GetMaterial(0)->GetName());
     }
+
 
     return true;
 }

@@ -4,7 +4,6 @@
 #include "CustomGameInstance.h"
 
 #include "CubeActor.h"
-#include "Chaos/PBDRigidClusteringAlgo.h"
 #include "CmdLineArgsProject/GLTFImporter/GLTFAsset.h"
 #include "CmdLineArgsProject/GLTFImporter/GLTFImporterFunctionLibrary.h"
 
@@ -46,36 +45,48 @@ void UCustomGameInstance::OnStart()
         FString("/home/shane/Downloads/VulkanSampleScene.glb")
     );*/
 
-    /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
-        FString("/home/shane/Downloads/VulkanSampleSceneWithTextures.glb")
-    );*/
+    FString FileName;
+
 
     /*auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/CesiumMan.glb")
     );*/
 
+    /*
     auto glTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
         FString("/home/shane/Downloads/DamagedHelmet.glb")
     );
+    */
 
+    const auto CommandLine = FCommandLine::Get();
 
-    if (glTfAsset)
+    if (!FParse::Value(CommandLine, TEXT("glTFFile="), FileName))
+    {
+        UE_LOG(LogTemp, Error, TEXT("UCustomGameInstance::OnStart::Error:: No File Name given"));
+        FileName = FString("/home/shane/Downloads/CesiumMan.glb");
+    }
+
+    const auto GLTfAsset = UGLTFImporterFunctionLibrary::ImportGlTF(
+        FString(FileName)
+    );
+
+    if (GLTfAsset)
     {
         UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::glTF Imported"));
 
-        if (const auto bModelLoaded = glTfAsset->LoadModel(); !bModelLoaded)
+        if (const auto bModelLoaded = GLTfAsset->LoadModel(); !bModelLoaded)
         {
             UE_LOG(LogTemp, Error, TEXT("UCustomGameInstance::OnStart::Error:: Failed To Load Model"));
         }
         else
         {
-            auto glTfStaticMeshComponents = glTfAsset->GetStaticMeshComponents();
+            auto GLTfStaticMeshComponents = GLTfAsset->GetStaticMeshComponents();
 
             UE_LOG(LogTemp, Display, TEXT("UCustomGameInstance::OnStart::Display:: %d Static Meshes Loaded"),
-                   glTfStaticMeshComponents.Num());
+                   GLTfStaticMeshComponents.Num());
 
 
-            for (const auto StaticMeshComponent : glTfStaticMeshComponents)
+            for (const auto StaticMeshComponent : GLTfStaticMeshComponents)
             {
                 CubeActor->AddStaticMeshComponent(StaticMeshComponent);
             }

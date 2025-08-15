@@ -94,6 +94,7 @@ void ACubeActor::Tick(float DeltaTime)
     // Wait for the file to save?
     if (PictureTaken && TimeElapsed >= 10.f)
     {
+
         // shutdown
         //FGenericPlatformMisc::RequestExit(false);
     }

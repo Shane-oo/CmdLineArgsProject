@@ -37,8 +37,6 @@ protected:
 
     TSharedPtr<FJsonObject> Root;
 
-    TMap<int32, TObjectPtr<UGLTFStaticMeshComponent>> StaticMeshesCache;
-
     TArray<UGLTFStaticMeshComponent*> GlTFStaticMeshes;
 
     TMap<int32, UGLTFMaterial*> MaterialIndexToMaterialMap;
@@ -81,19 +79,6 @@ public:
     void SetBinaryBuffer(const TArray64<uint8>& BinaryBuffer)
     {
         this->BinaryBuffer = BinaryBuffer;
-    }
-
-    TArray<TObjectPtr<UGLTFStaticMeshComponent>> GetStaticMeshesOLD()
-    {
-        TArray<TObjectPtr<UGLTFStaticMeshComponent>> Result;
-        Result.Reserve(StaticMeshesCache.Num());
-
-        for (const TPair<int32, TObjectPtr<UGLTFStaticMeshComponent>>& Pair : StaticMeshesCache)
-        {
-            Result.Add(Pair.Value);
-        }
-
-        return Result;
     }
 
     TArray<UGLTFStaticMeshComponent*> GetStaticMeshes()
@@ -149,7 +134,7 @@ private:
 
     bool GetJsonObjectBytes(const TSharedRef<FJsonObject>& JsonObject, TArray64<uint8>& Bytes);
 
-    bool ParseBase64Uri(const FString& Uri, TArray64<uint8>& Bytes);
+    static bool ParseBase64Uri(const FString& Uri, TArray64<uint8>& Bytes);
 
     template <int32 Num, typename T>
     static bool GetJsonVector(const TArray<TSharedPtr<FJsonValue>>* JsonValues, T& Value);

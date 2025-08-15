@@ -25,11 +25,6 @@ protected:
     TSharedPtr<FGLTFParser> Parser;
 
 public:
-    TArray<TObjectPtr<UGLTFStaticMeshComponent>> GetStaticMeshesOld() const
-    {
-        return Parser->GetStaticMeshesOLD();
-    }
-
     TArray<UGLTFStaticMeshComponent*> GetStaticMeshComponents() const
     {
         return Parser->GetStaticMeshes();

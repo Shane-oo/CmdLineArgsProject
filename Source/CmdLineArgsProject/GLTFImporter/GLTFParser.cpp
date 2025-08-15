@@ -4,15 +4,12 @@
 
 #include "GLTFParser.h"
 
-#include "GLTFAsset.h"
 #include "GLTFMaterial.h"
 #include "GLTFStaticMeshComponent.h"
 #include "IImageWrapperModule.h"
 #include "ImageUtils.h"
 
 // #region Private Methods
-
-class UGLTFStaticMeshComponent;
 
 bool FGLTFParser::IsTextureSizeAlignedToPixelFormat(const int Width, const int Height, const EPixelFormat PixelFormat)
 {
@@ -595,7 +592,6 @@ void FGLTFParser::GetNormals(const TSharedPtr<FJsonObject>* JsonAttributesObject
         return;
     }
 
-
     int64 NormalBufferViewIndex;
     int64 NormalByteOffset = 0;
     if (!JsonNormalAccessorObject->TryGetNumberField(TEXT("bufferView"), NormalBufferViewIndex))
@@ -1164,13 +1160,6 @@ FGLTFParser::~FGLTFParser()
 void FGLTFParser::AddReferencedObjects(FReferenceCollector& Collector)
 {
     // UObjects to keep alive
-
-    Collector.AddReferencedObjects(StaticMeshesCache);
-    //Collector.AddReferencedObjects(MaterialsCache);
-    //Collector.AddReferencedObjects(TexturesCache);
-    //Collector.AddReferencedObjects(MaterialsNameCache);
-    //Collector.AddReferencedObjects(MetallicRoughnessMaterialsMap);
-    //Collector.AddReferencedObjects(SpecularGlossinessMaterialsMap);
 }
 
 TSharedPtr<FGLTFParser> FGLTFParser::CreateFromFileName(const FString& FileName)
