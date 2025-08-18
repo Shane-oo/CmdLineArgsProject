@@ -871,6 +871,17 @@ bool FGLTFParser::LoadNode(TSharedPtr<FJsonObject> JsonNode, int32 NodeIndex)
         Transform = FTransform(Rotation, Translation, Scale);
     }
 
+    const TSharedPtr<FJsonObject>* ExtrasObject = nullptr;
+    if (JsonNode->TryGetObjectField(TEXT("extras"), ExtrasObject))
+    {
+        FString PredictedMaterialName;
+        if ((*ExtrasObject)->TryGetStringField(TEXT("predictedMaterial"), PredictedMaterialName))
+        {
+            UE_LOG(LogTemp, Error, TEXT("GOT Extreas: %s"), *PredictedMaterialName);
+        }
+    }
+
+
     if (const TArray<TSharedPtr<FJsonValue>>* JsonChildren;
         JsonNode->TryGetArrayField(TEXT("children"), JsonChildren))
     {

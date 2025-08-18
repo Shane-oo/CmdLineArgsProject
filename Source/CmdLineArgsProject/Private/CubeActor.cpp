@@ -67,8 +67,6 @@ void ACubeActor::Tick(float DeltaTime)
 
         //FString FileName = TEXT("screenshot.png");
 
-
-        /*FPaths::ScreenShotDir();
         if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
         {
             //GetHighResScreenshotConfig().FilenameOverride = FileName;
@@ -81,10 +79,11 @@ void ACubeActor::Tick(float DeltaTime)
 
                 FFileHelper::SaveStringToFile(FString("test"),
                                               *file,
-                                              FFileHelper::EEncodingOptions::AutoDetect, &IFileManager::Get(),
+                                              FFileHelper::EEncodingOptions::AutoDetect,
+                                              &IFileManager::Get(),
                                               FILEWRITE_Append);
             }
-        }*/
+        }
 
         // shutdown
         //FGenericPlatformMisc::RequestExit(false);
@@ -94,8 +93,8 @@ void ACubeActor::Tick(float DeltaTime)
     // Wait for the file to save?
     if (PictureTaken && TimeElapsed >= 10.f)
     {
-
         // shutdown
+        UE_LOG(LogTemp, Warning, TEXT("ACubeActor::Tick::Warning:: Shutting Down"));
         //FGenericPlatformMisc::RequestExit(false);
     }
 }

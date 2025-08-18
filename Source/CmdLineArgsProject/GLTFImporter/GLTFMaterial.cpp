@@ -102,8 +102,6 @@ bool UGLTFMaterial::CreateMaterial(const FGlTFMaterialProperties& GlTFMaterialPr
         return false;
     }
 
-    UE_LOG(LogTemp, Display, TEXT("FGLTFParser::CreateMaterial::Found BaseGlTFMaterial"));
-
     DynamicMaterial = UMaterialInstanceDynamic::Create(
         BaseGlTFMaterial,
         GetTransientPackage(),

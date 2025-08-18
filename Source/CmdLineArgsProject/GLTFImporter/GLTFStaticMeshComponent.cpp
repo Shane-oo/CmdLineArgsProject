@@ -130,9 +130,6 @@ bool UGLTFStaticMeshComponent::CreateMesh(FString Name,
     {
         ComputedMaterial = GlTFMaterial->GetMaterial();
         SetMaterial(0, ComputedMaterial);
-
-        UE_LOG(LogTemp, Display, TEXT("UGLTFStaticMeshComponent::CreateMesh::Display:: Set the Material to %s"),
-               *GetMaterial(0)->GetName());
     }
 
 
